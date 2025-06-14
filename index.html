@@ -107,7 +107,11 @@
         <div id="progressBar">
             <div id="progress"></div>
         </div>
-    </div>    <script>
+    </div>
+    
+    <audio id="explosionSound" preload="auto">
+        <source src="explosion.mp3" type="audio/mpeg">
+    </audio><script>
         function readMind() {
             const number = document.getElementById('numberInput').value;
             if (!number) {
@@ -154,9 +158,12 @@
                 }
                 
                 width += speed;
-                progress.style.width = width + '%';
-                  if (width >= 100) {
+                progress.style.width = width + '%';                if (width >= 100) {
                     clearInterval(interval);
+    
+                    const explosionSound = document.getElementById('explosionSound');
+                    explosionSound.currentTime = 0;
+                    explosionSound.play();
     
                     const explosion = document.createElement('div');
                     explosion.className = 'explosion';
