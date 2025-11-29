@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Update</title>
+    <style>
+        body {
+            background-color: blue;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: none; /* Hide cursor for effect */
+        }
+        h1 {
+            font-size: 100px;
+            margin: 0;
+        }
+        p {
+            font-size: 24px;
+        }
+        .error-box {
+            position: absolute;
+            background: #d4d0c8;
+            border: 2px solid white;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            color: black;
+            padding: 2px;
+            width: 300px;
+            font-family: 'Tahoma', sans-serif;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 100;
+        }
+        .title-bar {
+            background: linear-gradient(90deg, navy, #1084d0);
+            color: white;
+            padding: 2px 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button {
+            margin-top: 10px;
+            padding: 5px 15px;
+        }
+        #escape {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        #escape:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>:(</h1>
+    <p>Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</p>
+    <p id="percentage">0% complete</p>
+
+    <a href="index.html" id="escape">Escape Simulation</a>
+
+    <script>
+        // Fake percentage counter
+        let percent = 0;
+        const percentEl = document.getElementById('percentage');
+        
+        setInterval(() => {
+            if (percent < 99) {
+                percent++;
+                percentEl.textContent = percent + '% complete';
+            } else {
+                // When it hits 99%, start popping up fake errors
+                startChaos();
+            }
+        }, 100);
+
+        function startChaos() {
+            // Create error boxes randomly
+            setInterval(() => {
+                createErrorBox();
+            }, 200);
+        }
+
+        function createErrorBox() {
+            const box = document.createElement('div');
+            box.className = 'error-box';
+            box.style.display = 'block';
+            
+            // Random position
+            const x = Math.random() * (window.innerWidth - 300);
+            const y = Math.random() * (window.innerHeight - 200);
+            
+            box.style.left = x + 'px';
+            box.style.top = y + 'px';
+            
+            box.innerHTML = `
+                <div class="title-bar">
+                    <span>Critical Error</span>
+                    <span>X</span>
+                </div>
+                <div class="content">
+                    <p>System32 is confused.</p>
+                    <button>OK</button>
+                </div>
+            `;
+            
+            document.body.appendChild(box);
+            
+            // Play a beep sound if possible? (Simulated visual beep)
+            document.body.style.filter = document.body.style.filter === 'invert(1)' ? 'invert(0)' : 'invert(1)';
+        }
+    </script>
+</body>
+</html>
+

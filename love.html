@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Realistic Love Calculator</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: #ffe6ea;
+            color: #d6336c;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .heart-container {
+            font-size: 100px;
+            margin: 20px;
+            animation: beat 1s infinite;
+        }
+        input {
+            padding: 15px;
+            font-size: 20px;
+            border: 2px solid #ff99ac;
+            border-radius: 20px;
+            outline: none;
+            margin: 10px;
+            width: 250px;
+            text-align: center;
+        }
+        button {
+            background: #ff3366;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.1);
+            background: #e60040;
+        }
+        #result {
+            margin-top: 40px;
+            font-size: 30px;
+            font-weight: bold;
+            min-height: 100px;
+        }
+        .loading {
+            display: none;
+        }
+        @keyframes beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .broken {
+            display: inline-block;
+            animation: break 1s forwards;
+        }
+        @keyframes break {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(180deg) translateY(20px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>💘 Scientifically Accurate Love Calculator 💘</h1>
+    
+    <div class="heart-container" id="heart">❤️</div>
+    
+    <div>
+        <input type="text" id="person1" placeholder="Your Name">
+        <span style="font-size: 30px;">+</span>
+        <input type="text" id="person2" placeholder="Crush's Name">
+    </div>
+
+    <button onclick="calculateLove()">Calculate Destiny</button>
+
+    <div id="result"></div>
+    
+    <br><br>
+    <a href="index.html" style="color: #ff3366;">Back to Reality</a>
+
+    <script>
+        function calculateLove() {
+            const p1 = document.getElementById('person1').value;
+            const p2 = document.getElementById('person2').value;
+            const resultDiv = document.getElementById('result');
+            const heart = document.getElementById('heart');
+            
+            if (!p1 || !p2) {
+                alert("It takes two to tango! Enter both names.");
+                return;
+            }
+
+            resultDiv.innerHTML = "Consulting Cupid...";
+            heart.style.animationDuration = "0.2s"; // Fast beat
+
+            setTimeout(() => {
+                heart.style.animationDuration = "1s";
+                
+                // The Troll: Always low or negative or rude results
+                const badOutcomes = [
+                    { score: "0%", text: "Absolutely not. Get a cat instead." },
+                    { score: "-50%", text: "Restraining order recommended." },
+                    { score: "1%", text: "Maybe in another universe. A worse one." },
+                    { score: "404", text: "Love Not Found." },
+                    { score: "NaN", text: "Not a Number, just like your chances." },
+                    { score: "12%", text: "They are way out of your league." },
+                    { score: "99%", text: "...chance of rejection." },
+                    { score: "Error", text: "System crashed laughing at this pair." }
+                ];
+                
+                const outcome = badOutcomes[Math.floor(Math.random() * badOutcomes.length)];
+                
+                resultDiv.innerHTML = `
+                    <div style="font-size: 60px;">${outcome.score}</div>
+                    <div>${outcome.text}</div>
+                `;
+                
+                if (Math.random() > 0.5) {
+                    heart.innerHTML = "💔";
+                } else {
+                    heart.innerHTML = "🤢";
+                }
+
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+

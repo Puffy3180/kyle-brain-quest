@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DVD Screensaver</title>
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        #dvd {
+            position: absolute;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 40px;
+            font-weight: bold;
+            color: #ff0000;
+            user-select: none;
+            line-height: 1;
+        }
+        .back-link {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: #333;
+            text-decoration: none;
+            z-index: 100;
+        }
+        .back-link:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back</a>
+    <div id="dvd">DVD</div>
+
+    <script>
+        const dvd = document.getElementById('dvd');
+        let x = 100;
+        let y = 100;
+        let vx = 3;
+        let vy = 3;
+        let colorIndex = 0;
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+
+        function update() {
+            const rect = dvd.getBoundingClientRect();
+            const parentWidth = window.innerWidth;
+            const parentHeight = window.innerHeight;
+
+            // Check for corner hit proximity and annoyingly steer away if it's too close to a perfect corner hit
+            // This is the troll part: subtly change velocity to miss the corner
+            // ... implementation of corner avoidance logic ...
+            
+            // Standard bounce logic
+            if (x + rect.width >= parentWidth || x <= 0) {
+                vx = -vx;
+                changeColor();
+                // Troll: If we are near a corner (y is near 0 or height), adjust vy slightly to miss
+                if (y < 50 || y > parentHeight - 50) {
+                     // Add a tiny bit of random chaos to ensure it misses
+                     vy += (Math.random() * 0.5 - 0.25); 
+                }
+            }
+            if (y + rect.height >= parentHeight || y <= 0) {
+                vy = -vy;
+                changeColor();
+                // Troll: If near x corners
+                if (x < 50 || x > parentWidth - 50) {
+                    vx += (Math.random() * 0.5 - 0.25);
+                }
+            }
+
+            x += vx;
+            y += vy;
+
+            // Clamp to screen
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x + rect.width > parentWidth) x = parentWidth - rect.width;
+            if (y + rect.height > parentHeight) y = parentHeight - rect.height;
+
+            dvd.style.left = x + 'px';
+            dvd.style.top = y + 'px';
+
+            requestAnimationFrame(update);
+        }
+
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            dvd.style.color = colors[colorIndex];
+        }
+
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>
+
