@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Duel (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg=='); }
+        .ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 50px; font-size: 1.5rem; pointer-events: none; }
+        .back-btn { position: absolute; bottom: 20px; color: #555; text-decoration: none; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div style="color: #fab1a0">P1: WASD + SPACE</div>
+        <div style="color: #74b9ff">P2: ARROWS + ENTER</div>
+    </div>
+    
+    <canvas id="game" width="800" height="600"></canvas>
+    
+    <a href="../../index.html" class="back-btn">Exit Space</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        class Ship {
+            constructor(x, y, color, controls) {
+                this.x = x;
+                this.y = y;
+                this.angle = 0;
+                this.vx = 0;
+                this.vy = 0;
+                this.color = color;
+                this.controls = controls;
+                this.bullets = [];
+                this.cooldown = 0;
+                this.alive = true;
+                this.score = 0;
+            }
+
+            update() {
+                if (!this.alive) {
+                    if (Math.random() < 0.01) this.respawn();
+                    return;
+                }
+
+                // Controls
+                if (keys[this.controls.left]) this.angle -= 0.1;
+                if (keys[this.controls.right]) this.angle += 0.1;
+                if (keys[this.controls.up]) {
+                    this.vx += Math.cos(this.angle) * 0.2;
+                    this.vy += Math.sin(this.angle) * 0.2;
+                }
+
+                // Physics
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.98; // Friction
+                this.vy *= 0.98;
+
+                // Screen Wrap
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+
+                // Shoot
+                if (this.cooldown > 0) this.cooldown--;
+                if (keys[this.controls.shoot] && this.cooldown <= 0) {
+                    this.bullets.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(this.angle) * 10,
+                        vy: Math.sin(this.angle) * 10,
+                        life: 60
+                    });
+                    this.cooldown = 15;
+                }
+
+                // Update Bullets
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    let b = this.bullets[i];
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    b.life--;
+                    if (b.life <= 0) this.bullets.splice(i, 1);
+                    
+                    // Wrap bullets
+                    if (b.x < 0) b.x = canvas.width;
+                    if (b.x > canvas.width) b.x = 0;
+                    if (b.y < 0) b.y = canvas.height;
+                    if (b.y > canvas.height) b.y = 0;
+                }
+            }
+
+            respawn() {
+                this.alive = true;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = 0;
+                this.vy = 0;
+            }
+
+            draw() {
+                // Bullets
+                ctx.fillStyle = this.color;
+                this.bullets.forEach(b => {
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                if (!this.alive) return;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.lineTo(-10, -10);
+                ctx.lineTo(-5, 0);
+                ctx.lineTo(-10, 10);
+                ctx.closePath();
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+
+        const p1 = new Ship(100, 300, '#fab1a0', { up: 'KeyW', left: 'KeyA', right: 'KeyD', shoot: 'Space' });
+        const p2 = new Ship(700, 300, '#74b9ff', { up: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', shoot: 'Enter' });
+
+        function checkHits() {
+            p1.bullets.forEach((b, i) => {
+                if (p2.alive && Math.hypot(b.x - p2.x, b.y - p2.y) < 15) {
+                    p2.alive = false;
+                    p1.score++;
+                    p1.bullets.splice(i, 1);
+                }
+            });
+            p2.bullets.forEach((b, i) => {
+                if (p1.alive && Math.hypot(b.x - p1.x, b.y - p1.y) < 15) {
+                    p1.alive = false;
+                    p2.score++;
+                    p2.bullets.splice(i, 1);
+                }
+            });
+        }
+
+        function drawScores() {
+            ctx.fillStyle = '#fff';
+            ctx.font = "20px Space Grotesk";
+            ctx.fillText("P1: " + p1.score, 50, 50);
+            ctx.fillText("P2: " + p2.score, 700, 50);
+        }
+
+        function loop() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Trails
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            p1.update();
+            p2.update();
+            checkHits();
+
+            p1.draw();
+            p2.draw();
+            drawScores();
+
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+</html>

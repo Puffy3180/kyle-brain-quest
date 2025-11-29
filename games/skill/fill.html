@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fill</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #fff;
+            color: #000;
+            font-family: 'Space Grotesk', sans-serif;
+            touch-action: none;
+            cursor: none;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+        h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        p { margin: 5px 0 0; color: #555; font-size: 14px; }
+        #score-display { font-size: 40px; font-weight: bold; color: #000; margin-top: 10px; }
+        
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        button {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        button:hover { transform: scale(1.05); }
+        .back-link {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #666;
+            text-decoration: none;
+            z-index: 100;
+            font-weight: bold;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1>FILL</h1>
+        <p>EAT SMALLER DOTS. AVOID LARGER DOTS.</p>
+        <div id="score-display">Size: 10</div>
+    </div>
+
+    <div id="overlay">
+        <h1 id="title">FILL</h1>
+        <p id="msg">Move to Eat. Grow Big.</p>
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <a href="../../index.html" class="back-link">← Back</a>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score-display');
+        const overlay = document.getElementById('overlay');
+        
+        let width, height;
+        let player = { x: 0, y: 0, r: 10, color: '#000' };
+        let dots = [];
+        let isGameRunning = false;
+        let mouse = { x: 0, y: 0 };
+        let animationId;
+        
+        const COLORS = ['#ff7675', '#74b9ff', '#55efc4', '#fdcb6e', '#a29bfe'];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            if(!isGameRunning) {
+                player.x = width/2;
+                player.y = height/2;
+            }
+        }
+        window.addEventListener('resize', resize);
+        
+        window.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        class Dot {
+            constructor() {
+                this.reset();
+                // Ensure not spawning on player
+                while(Math.hypot(this.x - player.x, this.y - player.y) < player.r + this.r + 100) {
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                
+                // Size relative to player to ensure some are edible
+                const sizeVariance = Math.random(); 
+                if (sizeVariance > 0.7) {
+                    this.r = player.r * (1.2 + Math.random()); // Bigger (Danger)
+                } else {
+                    this.r = player.r * (0.2 + Math.random() * 0.6); // Smaller (Food)
+                }
+                
+                // Minimum size
+                if(this.r < 3) this.r = 3;
+
+                // Speed
+                const speed = (20 / this.r) + Math.random(); // Smaller = Faster
+                const angle = Math.random() * Math.PI * 2;
+                this.vx = Math.cos(angle) * speed * 0.5;
+                this.vy = Math.sin(angle) * speed * 0.5;
+
+                this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off walls
+                if(this.x < this.r || this.x > width - this.r) this.vx *= -1;
+                if(this.y < this.r || this.y > height - this.r) this.vy *= -1;
+
+                // Screen wrapping for more chaos? No, bounce is better for trapping.
+                
+                // Repel from player if smaller (Run away!)
+                // if(this.r < player.r) {
+                //    const dx = this.x - player.x;
+                //    const dy = this.y - player.y;
+                //    const dist = Math.sqrt(dx*dx + dy*dy);
+                //    if(dist < 200) {
+                //        this.vx += (dx/dist) * 0.1;
+                //        this.vy += (dy/dist) * 0.1;
+                //    }
+                // }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Visual cue for danger?
+                if(this.r > player.r) {
+                    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function startGame() {
+            isGameRunning = true;
+            overlay.style.display = 'none';
+            player.r = 10;
+            player.x = width/2;
+            player.y = height/2;
+            mouse.x = width/2;
+            mouse.y = height/2;
+            
+            dots = [];
+            for(let i=0; i<30; i++) dots.push(new Dot());
+            
+            loop();
+        }
+
+        function gameOver() {
+            isGameRunning = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('title').innerText = "POPPED";
+            document.getElementById('msg').innerText = `Final Size: ${Math.floor(player.r)}`;
+            document.querySelector('#overlay button').innerText = "Try Again";
+            overlay.style.display = 'flex';
+        }
+
+        function winGame() {
+            // Unlikely to "win" infinite growth, but maybe a milestone?
+        }
+
+        function loop() {
+            if(!isGameRunning) return;
+
+            // Clear
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Update Player (Lag behind mouse for weight feel)
+            // Heavier = Slower
+            const lerpSpeed = 0.1; // Math.max(0.01, 0.1 - (player.r / 1000));
+            player.x += (mouse.x - player.x) * lerpSpeed;
+            player.y += (mouse.y - player.y) * lerpSpeed;
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Update & Draw Dots
+            dots.forEach(dot => {
+                dot.update();
+                dot.draw();
+
+                // Collision
+                const dist = Math.hypot(player.x - dot.x, player.y - dot.y);
+                if(dist < player.r + dot.r) {
+                    if(player.r > dot.r * 1.1) { // Eat (must be slightly bigger)
+                        // Area based growth: A_new = A_player + A_dot
+                        // PI*r_new^2 = PI*r_p^2 + PI*r_d^2
+                        // r_new = sqrt(r_p^2 + r_d^2)
+                        player.r = Math.sqrt(player.r*player.r + dot.r*dot.r * 0.5); // Grow slower than 1:1 to keep game going
+                        dot.reset();
+                        scoreEl.innerText = "Size: " + Math.floor(player.r);
+                    } else if (dot.r > player.r) { // Die
+                        gameOver();
+                    }
+                }
+            });
+
+            // Maintain Dot Count & Ramp Difficulty
+            // As player grows, spawn BIGGER dots
+            if(Math.random() < 0.05 && dots.length < 50) {
+                dots.push(new Dot());
+            }
+
+            animationId = requestAnimationFrame(loop);
+        }
+
+        resize();
+
+    </script>
+</body>
+</html>

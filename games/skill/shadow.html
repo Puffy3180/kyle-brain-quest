@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shadow Leap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #fff; color: #000; font-family: 'Space Grotesk', sans-serif; cursor: none; }
+        canvas { display: block; }
+        #ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            mix-blend-mode: difference;
+            color: white;
+            z-index: 10;
+        }
+        h1 { font-size: 4rem; margin: 0; }
+        p { font-size: 1.5rem; }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: transparent;
+            color: #000;
+            border: 1px solid #000;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 100;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../../index.html'">← Back</button>
+
+    <div id="ui">
+        <h1 id="title">SHADOW LEAP</h1>
+        <p id="msg">Stay in the Dark. Light Burns.</p>
+        <p id="score">Score: 0</p>
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const ui = document.getElementById('ui');
+        const title = document.getElementById('title');
+        const msg = document.getElementById('msg');
+        const scoreEl = document.getElementById('score');
+
+        let width, height;
+        let player = { x: 0, y: 0, r: 10, alive: false };
+        let shadows = [];
+        let score = 0;
+        let startTime = 0;
+        
+        // Setup Shadows
+        function initShadows() {
+            shadows = [];
+            // Initial safe zone
+            shadows.push({
+                type: 'circle', x: width/2, y: height/2, r: 150, 
+                vx: 0, vy: 0, targetX: width/2, targetY: height/2
+            });
+            
+            // Random shadows
+            for(let i=0; i<5; i++) {
+                spawnShadow();
+            }
+        }
+
+        function spawnShadow() {
+            const r = 50 + Math.random() * 100;
+            shadows.push({
+                type: 'circle',
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: r,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                targetX: Math.random() * width,
+                targetY: Math.random() * height
+            });
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            if(!player.alive) {
+                player.x = width/2;
+                player.y = height/2;
+            }
+        }
+        window.addEventListener('resize', resize);
+
+        // Input
+        window.addEventListener('mousemove', e => {
+            if(player.alive) {
+                player.x = e.clientX;
+                player.y = e.clientY;
+            }
+        });
+        
+        window.addEventListener('click', () => {
+            if(!player.alive) startGame();
+        });
+
+        function startGame() {
+            player.alive = true;
+            player.x = width/2;
+            player.y = height/2;
+            score = 0;
+            startTime = Date.now();
+            initShadows();
+            title.style.display = 'none';
+            msg.style.display = 'none';
+            // We need to warp mouse? Can't in browser.
+            // Player just snaps to mouse on move.
+        }
+
+        function gameOver() {
+            player.alive = false;
+            title.style.display = 'block';
+            title.innerText = "BURNED";
+            msg.style.display = 'block';
+            msg.innerText = "Click to Restart";
+        }
+
+        function update() {
+            if(!player.alive) return;
+
+            score = Math.floor((Date.now() - startTime) / 100);
+            scoreEl.innerText = score;
+
+            // Update Shadows
+            shadows.forEach(s => {
+                // Move towards target randomly
+                if(Math.random() < 0.02) { // More erratic
+                    s.targetX = Math.random() * width;
+                    s.targetY = Math.random() * height;
+                }
+                
+                // Lerp - Faster movement
+                s.x += (s.targetX - s.x) * 0.01;
+                s.y += (s.targetY - s.y) * 0.01;
+                
+                // Wander
+                s.x += Math.sin(Date.now() * 0.002 + s.r) * 2; // Faster wander
+                s.y += Math.cos(Date.now() * 0.002 + s.r) * 2;
+                
+                // Shrink over time (Challenge)
+                if(s.r > 30) s.r -= 0.02;
+            });
+
+            // Add new shadows over time - LIMIT MAX SHADOWS
+            if(score % 100 === 0 && score > 0 && Math.random() < 0.1 && shadows.length < 15) { // Fewer max shadows
+                spawnShadow();
+            }
+
+            // Check collision (Are we in ANY shadow?)
+            // If we are NOT in ANY shadow, we die.
+            let safe = false;
+            
+            // Optimization: Check only if player is within bounding box first?
+            // Or just keep it simple, circles are fast.
+            // Issue might be rendering large rects or too many fills.
+            
+            for(let s of shadows) {
+                const dx = player.x - s.x;
+                const dy = player.y - s.y;
+                // Use squared distance to avoid sqrt if possible, but we need compare to radius.
+                // dist < s.r <=> dist^2 < s.r^2
+                const distSq = dx*dx + dy*dy;
+                if(distSq < s.r * s.r) {
+                    safe = true;
+                    break;
+                }
+            }
+
+            if(!safe) gameOver();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#fff'; // Light
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Shadows
+            ctx.fillStyle = '#000';
+            ctx.beginPath(); // Batch paths
+            shadows.forEach(s => {
+                ctx.moveTo(s.x + s.r, s.y);
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+            });
+            ctx.fill(); // Single fill call
+
+            // Draw Player
+            ctx.fillStyle = player.alive ? '#00ff00' : '#ff0000';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        resize();
+        initShadows();
+        loop();
+
+    </script>
+</body>
+</html>

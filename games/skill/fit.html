@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shape Shift</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #2d3436; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        #ui {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            pointer-events: auto;
+        }
+        .shape-btn {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.1s;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shape-btn.active {
+            border-color: #fff;
+            background: #6c5ce7;
+            transform: scale(1.1);
+        }
+        #score {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            z-index: 100;
+        }
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
+            border-radius: 20px;
+            z-index: 200;
+            border: 2px solid #ff7675;
+        }
+        h2 { margin: 0 0 20px; color: #ff7675; font-size: 3rem; }
+        button.restart {
+            background: #ff7675;
+            border: none;
+            padding: 15px 30px;
+            color: white;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../../index.html'">← Back</button>
+
+    <div id="score">0</div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui">
+        <div>Select Shape to Fit</div>
+        <div class="controls">
+            <div class="shape-btn" id="btn-square" onclick="setShape('square')">■<br><span style="font-size:10px">1 / Q</span></div>
+            <div class="shape-btn" id="btn-circle" onclick="setShape('circle')">●<br><span style="font-size:10px">2 / W</span></div>
+            <div class="shape-btn" id="btn-triangle" onclick="setShape('triangle')">▲<br><span style="font-size:10px">3 / E</span></div>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h2>CRASH!</h2>
+        <p id="final-score">Score: 0</p>
+        <button class="restart" onclick="resetGame()">Try Again</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const gameOverEl = document.getElementById('game-over');
+        const finalScoreEl = document.getElementById('final-score');
+
+        let width, height;
+        let cx, cy;
+
+        // Game State
+        let currentShape = 'square'; // square, circle, triangle
+        let walls = [];
+        let score = 0;
+        let speed = 0.012; // Much faster start
+        let spawnRate = 90; // Faster spawns
+        let rotation = 0; // Rotating effect
+        let frameCount = 0;
+        let isGameOver = false;
+
+        const colors = {
+            square: '#ff7675',
+            circle: '#74b9ff',
+            triangle: '#55efc4'
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            cx = width / 2;
+            cy = height / 2;
+        }
+        window.addEventListener('resize', resize);
+
+        function setShape(shape) {
+            if (isGameOver) return;
+            currentShape = shape;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + currentShape).classList.add('active');
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.key === '1' || e.key === 'q') setShape('square');
+            if (e.key === '2' || e.key === 'w') setShape('circle');
+            if (e.key === '3' || e.key === 'e') setShape('triangle');
+            if (e.code === 'Space' && isGameOver) resetGame();
+        });
+
+        function spawnWall() {
+            const types = ['square', 'circle', 'triangle'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            walls.push({
+                type: type,
+                scale: 0, // Starts at distance (0)
+                color: colors[type]
+            });
+        }
+
+        function resetGame() {
+            walls = [];
+            score = 0;
+            speed = 0.005;
+            frameCount = 0;
+            isGameOver = false;
+            scoreEl.textContent = score;
+            gameOverEl.style.display = 'none';
+            spawnWall();
+            loop();
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            finalScoreEl.textContent = "Score: " + score;
+            gameOverEl.style.display = 'block';
+        }
+
+        function drawShape(ctx, type, x, y, size, color, fill=true) {
+            ctx.beginPath();
+            if (type === 'square') {
+                const s = size;
+                ctx.rect(x - s/2, y - s/2, s, s);
+            } else if (type === 'circle') {
+                ctx.arc(x, y, size/2, 0, Math.PI*2);
+            } else if (type === 'triangle') {
+                const h = size * Math.sqrt(3)/2;
+                ctx.moveTo(x, y - h/2);
+                ctx.lineTo(x + size/2, y + h/2);
+                ctx.lineTo(x - size/2, y + h/2);
+                ctx.closePath();
+            }
+
+            if(fill) {
+                ctx.fillStyle = color;
+                ctx.fill();
+            } else {
+                ctx.lineWidth = 10 * (size / 200); // Scale line width
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+        }
+
+        // Drawing the "Hole in the wall"
+        // We actually draw the wall as a massive shape with a hole in the middle using 'evenodd' rule or just drawing 4 rectangles around the hole.
+        // Or simpler: Draw the outline of the shape scaling up.
+        // To look like a wall, we can fill the screen but mask out the shape.
+        function drawWall(wall) {
+            const s = wall.scale;
+            
+            ctx.globalAlpha = s; 
+            ctx.shadowBlur = 30 * s;
+            ctx.shadowColor = wall.color;
+            
+            // Tunnel Effect with Rotation
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(wall.rotation);
+            
+            const size = 200 / (1.1 - s);
+            
+            // Draw Shape Outline (Hole)
+            drawShape(ctx, wall.type, 0, 0, size, wall.color, false);
+            
+            ctx.restore();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+
+        function update() {
+            if (isGameOver) return;
+
+            rotation += 0.005; // Rotate player slightly
+            frameCount++;
+            if (frameCount > spawnRate) {
+                spawnWall();
+                frameCount = 0;
+                // Increase difficulty faster
+                if (spawnRate > 30) spawnRate -= 4; // Decrease spawn delay faster
+                speed += 0.0005; // Speed up more
+            }
+
+            // Update walls
+            for (let i = walls.length - 1; i >= 0; i--) {
+                let w = walls[i];
+                w.scale += speed;
+                w.rotation += 0.01; // Spin walls
+
+                if (w.scale >= 1) {
+                    // Check collision
+                    if (w.type === currentShape) {
+                        // Pass!
+                        score++;
+                        scoreEl.textContent = score;
+                        walls.splice(i, 1);
+                        
+                        // Flash screen success
+                        document.body.style.backgroundColor = '#2d3436'; // Reset
+                        setTimeout(() => document.body.style.backgroundColor = '#00b894', 0);
+                        setTimeout(() => document.body.style.backgroundColor = '#2d3436', 50);
+                    } else {
+                        // Crash!
+                        gameOver();
+                    }
+                }
+            }
+        }
+
+        function render() {
+            // Clear with motion trail effect
+            ctx.fillStyle = 'rgba(45, 52, 54, 0.5)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Tunnel Lines (Perspective Grid)
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.beginPath();
+            ctx.moveTo(0, 0); ctx.lineTo(cx, cy);
+            ctx.moveTo(width, 0); ctx.lineTo(cx, cy);
+            ctx.moveTo(0, height); ctx.lineTo(cx, cy);
+            ctx.moveTo(width, height); ctx.lineTo(cx, cy);
+            ctx.stroke();
+
+            for (let i = walls.length - 1; i >= 0; i--) {
+                drawWall(walls[i]);
+            }
+
+            // Draw Player Shape
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotation * 0); // Player stays stable for clarity, or rotates? Let's keep stable but maybe pulse
+            drawShape(ctx, currentShape, 0, 0, 100, colors[currentShape], true);
+            ctx.restore();
+            
+            requestAnimationFrame(loop);
+        }
+
+        function loop() {
+            if (!isGameOver) {
+                update();
+                render();
+            }
+        }
+
+        // Init
+        resize();
+        updateButtons();
+        resetGame();
+
+    </script>
+</body>
+</html>

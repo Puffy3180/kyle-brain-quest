@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chain Reaction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #090909; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        canvas { display: block; }
+        .ui { position: absolute; top: 20px; left: 20px; pointer-events: none; }
+        .info { font-size: 2rem; }
+        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; display: none; }
+        .back-btn { position: absolute; top: 20px; right: 20px; color: #aaa; text-decoration: none; pointer-events: auto; }
+        button { font-size: 1.5rem; padding: 10px 20px; cursor: pointer; background: #6c5ce7; border: none; color: white; border-radius: 5px; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <a href="../../index.html" class="back-btn">Quit</a>
+    <div class="ui">
+        <div class="info">Level: <span id="lvl">1</span> | Target: <span id="target">1</span> / <span id="total">10</span></div>
+    </div>
+
+    <div id="msg">
+        <h1 id="status">SUCCESS!</h1>
+        <button onclick="nextLevel()" id="nextBtn">Next Level</button>
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let balls = [];
+        let explosions = [];
+        let level = 1;
+        let explodedCount = 0;
+        let gameState = 'playing'; // playing, exploded, finished
+
+        function initLevel() {
+            balls = [];
+            explosions = [];
+            explodedCount = 0;
+            gameState = 'playing';
+            document.getElementById('msg').style.display = 'none';
+
+            const count = 5 + level * 5;
+            const req = Math.floor(count * (0.2 + Math.min(0.6, level * 0.05)));
+            
+            document.getElementById('lvl').innerText = level;
+            document.getElementById('target').innerText = 0;
+            document.getElementById('total').innerText = req; // Display Requirement
+
+            for (let i = 0; i < count; i++) {
+                balls.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    r: 8,
+                    color: '#dfe6e9'
+                });
+            }
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            if (gameState === 'playing') {
+                createExplosion(e.clientX, e.clientY);
+                gameState = 'exploded';
+            }
+        });
+
+        function createExplosion(x, y) {
+            explosions.push({
+                x, y, r: 1, maxR: 60, life: 120, growing: true
+            });
+        }
+
+        function nextLevel() {
+            if (document.getElementById('status').innerText === 'SUCCESS!') {
+                level++;
+            }
+            initLevel();
+        }
+
+        function update() {
+            // Update Balls
+            balls.forEach(b => {
+                b.x += b.vx;
+                b.y += b.vy;
+                if (b.x < 0 || b.x > canvas.width) b.vx *= -1;
+                if (b.y < 0 || b.y > canvas.height) b.vy *= -1;
+            });
+
+            // Update Explosions
+            let activeExplosions = false;
+            for (let i = explosions.length - 1; i >= 0; i--) {
+                let e = explosions[i];
+                activeExplosions = true;
+
+                if (e.growing) {
+                    e.r += 1;
+                    if (e.r >= e.maxR) e.growing = false;
+                } else {
+                    e.life--;
+                    e.r *= 0.99; // Shrink slowly
+                }
+
+                // Check collisions with balls
+                for (let j = balls.length - 1; j >= 0; j--) {
+                    let b = balls[j];
+                    const dist = Math.hypot(b.x - e.x, b.y - e.y);
+                    if (dist < e.r + b.r) {
+                        // Chain Reaction!
+                        createExplosion(b.x, b.y);
+                        balls.splice(j, 1);
+                        explodedCount++;
+                        document.getElementById('target').innerText = explodedCount;
+                    }
+                }
+
+                if (e.life <= 0) explosions.splice(i, 1);
+            }
+
+            // Check End Condition
+            if (gameState === 'exploded' && !activeExplosions) {
+                const req = Math.floor((5 + level * 5) * (0.2 + Math.min(0.6, level * 0.05)));
+                const passed = explodedCount >= req;
+                
+                gameState = 'finished';
+                const msgEl = document.getElementById('msg');
+                const statusEl = document.getElementById('status');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                msgEl.style.display = 'block';
+                if (passed) {
+                    statusEl.innerText = "SUCCESS!";
+                    statusEl.style.color = '#00b894';
+                    nextBtn.innerText = "Next Level";
+                } else {
+                    statusEl.innerText = "FAILED";
+                    statusEl.style.color = '#d63031';
+                    nextBtn.innerText = "Try Again";
+                }
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = '#090909';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Balls
+            ctx.fillStyle = '#dfe6e9';
+            balls.forEach(b => {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Explosions
+            explosions.forEach(e => {
+                ctx.fillStyle = `rgba(108, 92, 231, ${e.life / 120})`;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = `rgba(162, 155, 254, ${e.life / 60})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        initLevel();
+        loop();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ninja Duel (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #2d3436; color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { background: #636e72; border-top: 4px solid #000; border-bottom: 4px solid #000; }
+        .ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 50px; font-size: 1.5rem; pointer-events: none; }
+        .back-btn { position: absolute; bottom: 20px; color: #aaa; text-decoration: none; pointer-events: auto; }
+        #msg { position: absolute; top: 50%; font-size: 5rem; text-shadow: 4px 4px #000; display: none; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div style="color: #000">P1: WASD + F (Attack)</div>
+        <div style="color: #fff">P2: ARROWS + L (Attack)</div>
+    </div>
+    
+    <h1 id="msg">P1 SLICE!</h1>
+    <canvas id="game" width="800" height="400"></canvas>
+    <a href="../../index.html" class="back-btn">Sheath Sword</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const msg = document.getElementById('msg');
+
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        class Ninja {
+            constructor(x, color, facing) {
+                this.x = x;
+                this.y = 300;
+                this.w = 30;
+                this.h = 50;
+                this.vx = 0;
+                this.vy = 0;
+                this.color = color;
+                this.facing = facing; // 1 right, -1 left
+                this.attacking = false;
+                this.attackTimer = 0;
+                this.cooldownTimer = 0;
+                this.score = 0;
+                this.alive = true;
+                this.grounded = true;
+            }
+
+            update() {
+                if (!this.alive) return;
+
+                // Physics
+                this.vy += 0.8; // Gravity
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.8; // Friction
+
+                if (this.y > 350) {
+                    this.y = 350;
+                    this.vy = 0;
+                    this.grounded = true;
+                }
+
+                if (this.x < 0) this.x = 0;
+                if (this.x > canvas.width - this.w) this.x = canvas.width - this.w;
+
+                // Attack Duration
+                if (this.attacking) {
+                    this.attackTimer--;
+                    if (this.attackTimer <= 0) this.attacking = false;
+                }
+
+                // Cooldown
+                if (this.cooldownTimer > 0) this.cooldownTimer--;
+            }
+
+            jump() {
+                if (this.grounded) {
+                    this.vy = -15;
+                    this.grounded = false;
+                }
+            }
+
+            attack() {
+                if (!this.attacking && this.cooldownTimer <= 0) {
+                    this.attacking = true;
+                    this.attackTimer = 10; // frames
+                    this.cooldownTimer = 60; // 1 second cooldown
+                    // Dash forward slightly
+                    this.vx = 15 * this.facing;
+                }
+            }
+
+            draw() {
+                if (!this.alive) return;
+
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.w, this.h);
+
+                // Eye band
+                ctx.fillStyle = this.color === '#000' ? '#fff' : '#000';
+                ctx.fillRect(this.x, this.y + 10, this.w, 10);
+
+                // Cooldown Bar
+                if (this.cooldownTimer > 0) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                    const width = (this.cooldownTimer / 60) * this.w;
+                    ctx.fillRect(this.x, this.y - 10, width, 5);
+                }
+
+                // Sword (if attacking)
+                if (this.attacking) {
+                    ctx.fillStyle = '#dfe6e9';
+                    ctx.fillRect(this.x + (this.facing === 1 ? this.w : -40), this.y + 20, 40, 5);
+                }
+            }
+        }
+
+        const p1 = new Ninja(100, '#000', 1);
+        const p2 = new Ninja(600, '#fff', -1);
+        let running = true;
+
+        function update() {
+            if (!running) {
+                if (keys['Space']) reset();
+                return;
+            }
+
+            // P1
+            if (keys['KeyA']) { p1.vx -= 1; p1.facing = -1; }
+            if (keys['KeyD']) { p1.vx += 1; p1.facing = 1; }
+            if (keys['KeyW']) p1.jump();
+            if (keys['KeyF']) p1.attack();
+
+            // P2
+            if (keys['ArrowLeft']) { p2.vx -= 1; p2.facing = -1; }
+            if (keys['ArrowRight']) { p2.vx += 1; p2.facing = 1; }
+            if (keys['ArrowUp']) p2.jump();
+            if (keys['KeyL']) p2.attack();
+
+            p1.update();
+            p2.update();
+
+            // Collision (Attack Hit)
+            if (checkHit(p1, p2)) kill(p2, p1);
+            else if (checkHit(p2, p1)) kill(p1, p2);
+        }
+
+        function checkHit(attacker, victim) {
+            if (attacker.attacking) {
+                // Hitbox relative to facing
+                let boxX = attacker.x + (attacker.facing === 1 ? attacker.w : -40);
+                let boxW = 40;
+                
+                // AABB
+                if (boxX < victim.x + victim.w &&
+                    boxX + boxW > victim.x &&
+                    attacker.y + 20 < victim.y + victim.h &&
+                    attacker.y + 25 > victim.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function kill(victim, killer) {
+            victim.alive = false;
+            running = false;
+            killer.score++;
+            msg.style.display = 'block';
+            msg.innerText = (killer === p1 ? "P1" : "P2") + " SLICE!";
+            setTimeout(reset, 1000);
+        }
+
+        function reset() {
+            running = true;
+            msg.style.display = 'none';
+            p1.x = 100; p1.y = 300; p1.alive = true; p1.vx = 0;
+            p2.x = 600; p2.y = 300; p2.alive = true; p2.vx = 0;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Floor
+            ctx.fillStyle = '#b2bec3';
+            ctx.fillRect(0, 400, 800, 50);
+
+            p1.draw();
+            p2.draw();
+
+            // Scores
+            ctx.font = "30px Space Grotesk";
+            ctx.fillStyle = '#000';
+            ctx.fillText("P1: " + p1.score, 50, 50);
+            ctx.fillStyle = '#fff';
+            ctx.fillText("P2: " + p2.score, 650, 50);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+</html>

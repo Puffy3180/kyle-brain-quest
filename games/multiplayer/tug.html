@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tug of War (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #222; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        .container { display: flex; height: 100vh; width: 100vw; }
+        .side { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 5rem; transition: background 0.1s; position: relative; }
+        #left { background: #ff4757; }
+        #right { background: #5352ed; }
+        #rope {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px; height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #fff;
+            z-index: 10;
+            transition: left 0.1s;
+        }
+        .controls { position: absolute; bottom: 20px; font-size: 2rem; opacity: 0.8; }
+        #winner {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 6rem;
+            text-shadow: 0 0 30px #000;
+            z-index: 20;
+            display: none;
+            white-space: nowrap;
+        }
+        .back-btn { position: absolute; top: 20px; left: 20px; z-index: 100; color: white; text-decoration: none; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <a href="../../index.html" class="back-btn">← Exit</a>
+    <h1 id="winner">P1 WINS!</h1>
+
+    <div id="rope"></div>
+
+    <div class="container">
+        <div id="left" class="side">
+            <span class="controls">TAP [A]</span>
+        </div>
+        <div id="right" class="side">
+            <span class="controls">TAP [L]</span>
+        </div>
+    </div>
+
+    <script>
+        const rope = document.getElementById('rope');
+        const winnerEl = document.getElementById('winner');
+        
+        let position = 50; // 50%
+        let gameRunning = true;
+
+        window.addEventListener('keydown', e => {
+            if (!gameRunning) {
+                if (e.code === 'Space') resetGame();
+                return;
+            }
+
+            // P1
+            if (e.code === 'KeyA') {
+                position -= 2;
+                flash('left');
+            }
+            
+            // P2
+            if (e.code === 'KeyL') {
+                position += 2;
+                flash('right');
+            }
+
+            checkWin();
+            updateVisuals();
+        });
+
+        function flash(side) {
+            const el = document.getElementById(side);
+            const orig = side === 'left' ? '#ff4757' : '#5352ed';
+            el.style.background = '#fff';
+            setTimeout(() => el.style.background = orig, 50);
+        }
+
+        function checkWin() {
+            if (position <= 10) win('P1');
+            if (position >= 90) win('P2');
+        }
+
+        function win(player) {
+            gameRunning = false;
+            winnerEl.innerText = player + " WINS!";
+            winnerEl.style.display = 'block';
+        }
+
+        function resetGame() {
+            position = 50;
+            gameRunning = true;
+            winnerEl.style.display = 'none';
+            updateVisuals();
+        }
+
+        function updateVisuals() {
+            rope.style.left = position + '%';
+        }
+    </script>
+</body>
+</html>

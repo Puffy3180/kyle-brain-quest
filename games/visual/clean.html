@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clean</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: radial-gradient(circle at center, #2a2a2e 0%, #000 100%); cursor: crosshair; }
+        canvas { display: block; position: absolute; top: 0; left: 0; }
+        #ui { position: fixed; bottom: 30px; left: 30px; color: white; font-family: 'Space Grotesk', sans-serif; pointer-events: none; mix-blend-mode: difference; }
+        h1 { margin: 0; font-size: 24px; opacity: 0.8; font-weight: bold; }
+        p { margin: 5px 0 0; opacity: 0.5; }
+        .back-link { position: fixed; top: 20px; right: 20px; color: white; text-decoration: none; font-family: 'Space Grotesk', sans-serif; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(5px); font-size: 14px; transition: background 0.2s; }
+        .back-link:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+    <canvas id="dirt"></canvas>
+    
+    <div id="ui">
+        <h1>IT IS DIRTY</h1>
+        <p id="message">Scrub to clean.</p>
+    </div>
+
+    <a href="../../index.html" class="back-link">I am satisfied</a>
+
+    <script>
+        const canvas = document.getElementById('dirt');
+        const ctx = canvas.getContext('2d');
+        const messageEl = document.getElementById('message');
+        
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            resetDirt();
+        }
+
+        function resetDirt() {
+            ctx.fillStyle = 'rgba(20, 15, 12, 0.95)'; // Deep grime color
+            ctx.fillRect(0, 0, width, height);
+            
+            // Add grime texture
+            for(let i=0; i<1000; i++) {
+                ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.3})`;
+                const s = Math.random() * 100 + 20;
+                ctx.fillRect(Math.random()*width, Math.random()*height, s, s);
+            }
+        }
+
+        window.addEventListener('resize', resize);
+        
+        function clean(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            
+            // Create a "brush" effect
+            ctx.beginPath();
+            ctx.arc(x, y, 50, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Drips/Splatter effect for realism
+            for(let i=0; i<5; i++) {
+                ctx.beginPath();
+                ctx.arc(x + (Math.random()-0.5)*80, y + (Math.random()-0.5)*80, Math.random()*10, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            clean(e.clientX, e.clientY);
+            
+            // Entropy: Dirt comes back slowly
+            if(Math.random() < 0.15) {
+                ctx.fillStyle = 'rgba(20, 15, 12, 0.05)';
+                const s = Math.random() * 200 + 50;
+                ctx.fillRect(Math.random()*width, Math.random()*height, s, s);
+            }
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            clean(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        const messages = ["Missed a spot", "So satisfying", "Scrub harder", "Eternal grime", "Just a bit more", "Entropy wins"];
+        setInterval(() => {
+           if(Math.random() > 0.7) messageEl.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }, 3000);
+
+        resize();
+    </script>
+</body>
+</html>
+

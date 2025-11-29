@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Echo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; cursor: crosshair; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 20px; left: 20px; pointer-events: none; }
+        h1 { margin: 0; font-size: 20px; opacity: 0.5; }
+        #level-display { font-size: 40px; font-weight: bold; }
+        #pings-display { font-size: 24px; color: #00ff00; margin-top: 10px; }
+        .tutorial { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; transition: opacity 1s; }
+        #win-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; color: #000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 1s;
+            z-index: 100;
+        }
+        #win-screen.visible { opacity: 1; pointer-events: auto; }
+        button { padding: 15px 40px; background: #000; color: #fff; border: none; font-size: 20px; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1>ECHO</h1>
+        <div id="level-display">LEVEL 1</div>
+        <div id="pings-display">Pings: 10</div>
+    </div>
+
+    <div class="tutorial" id="tutorial">
+        <h2>YOU ARE BLIND</h2>
+        <p>1. Click to send a sound pulse.<br>
+           2. Follow the ripples to find walls.<br>
+           3. Find the faint GREEN pulsing exit.<br>
+           4. Don't touch the walls.</p>
+    </div>
+
+    <div id="win-screen">
+        <h1>ESCAPED</h1>
+        <button onclick="nextLevel()">Next Level</button>
+    </div>
+    
+    <canvas id="game"></canvas>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const levelDisplay = document.getElementById('level-display');
+        const pingsDisplay = document.getElementById('pings-display');
+        const winScreen = document.getElementById('win-screen');
+        const tutorial = document.getElementById('tutorial');
+
+        let width, height;
+        let player = { x: 50, y: 50, r: 8, vx: 0, vy: 0 };
+        let pulses = [];
+        let walls = [];
+        let exit = { x: 0, y: 0, r: 30 };
+        let level = 1;
+        let keys = {};
+        let pings = 10;
+        
+        const COLORS = ['#ff7675', '#74b9ff', '#55efc4', '#fdcb6e', '#a29bfe', '#e17055', '#fff'];
+
+        // Setup Levels
+        function generateLevel(lvl) {
+            walls = [];
+            // Border walls
+            walls.push({x:0, y:0, w:width, h:10, color: '#fff'});
+            walls.push({x:0, y:height-10, w:width, h:10, color: '#fff'});
+            walls.push({x:0, y:0, w:10, h:height, color: '#fff'});
+            walls.push({x:width-10, y:0, w:10, h:height, color: '#fff'});
+
+            // Safe path zone: A corridor from TL to BR
+            // We will simply discard walls that intersect with a diagonal line from start to exit
+            // with some thickness
+            
+            // Random walls - MORE WALLS
+            const wallCount = 15 + lvl * 5;
+            let attempts = 0;
+            
+            while(walls.length < wallCount && attempts < 1000) {
+                attempts++;
+                let w = {
+                    x: Math.random() * (width-100) + 50,
+                    y: Math.random() * (height-100) + 50,
+                    w: Math.random() > 0.5 ? 150 : 30, // Longer walls
+                    h: Math.random() > 0.5 ? 30 : 150,
+                    color: COLORS[Math.floor(Math.random() * COLORS.length)]
+                };
+                
+                // Check intersection with "Safe Path"
+                // Safe path is roughly line from (0,0) to (width, height)
+                // Distance from point to line
+                const centerWx = w.x + w.w/2;
+                const centerWy = w.y + w.h/2;
+                
+                // Line defined by p1(50,50) and p2(width-100, height-100)
+                // Using distance formula
+                const x1=50, y1=50, x2=width-100, y2=height-100;
+                const dist = Math.abs((y2-y1)*centerWx - (x2-x1)*centerWy + x2*y1 - y2*x1) / Math.hypot(y2-y1, x2-x1);
+                
+                // If wall is too close to the main diagonal path, skip it (leave a path)
+                if (dist < 60) continue; 
+                
+                walls.push(w);
+            }
+
+            // Exit - SMALLER EXIT
+            exit.x = width - 100;
+            exit.y = height - 100;
+            exit.r = Math.max(10, 30 - lvl * 2); // Shrinks per level
+            
+            // Reset player
+            player.x = 50;
+            player.y = 50;
+            player.vx = 0;
+            player.vy = 0;
+            
+            pings = 10 + Math.floor(lvl * 2); // More pings for harder levels
+            updateUI();
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            generateLevel(level);
+        }
+        window.addEventListener('resize', resize);
+
+        function updateUI() {
+            levelDisplay.textContent = "LEVEL " + level;
+            pingsDisplay.textContent = "Pings: " + pings;
+            pingsDisplay.style.color = pings > 3 ? '#00ff00' : '#ff0000';
+        }
+
+        // Controls
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+        window.addEventListener('mousedown', () => {
+            if (pings > 0) {
+                pulses.push({ x: player.x, y: player.y, r: 1, life: 1 });
+                pings--;
+                updateUI();
+                // Remove tutorial on first click
+                tutorial.style.opacity = 0;
+            }
+        });
+
+        function update() {
+            // Player Movement
+            const speed = 2;
+            if(keys['w'] || keys['ArrowUp']) player.vy -= 0.5;
+            if(keys['s'] || keys['ArrowDown']) player.vy += 0.5;
+            if(keys['a'] || keys['ArrowLeft']) player.vx -= 0.5;
+            if(keys['d'] || keys['ArrowRight']) player.vx += 0.5;
+
+            // Friction
+            player.vx *= 0.9;
+            player.vy *= 0.9;
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Collision with Walls
+            walls.forEach(w => {
+                if (player.x + player.r > w.x && player.x - player.r < w.x + w.w &&
+                    player.y + player.r > w.y && player.y - player.r < w.y + w.h) {
+                    // Dead
+                    generateLevel(level); // Reset level
+                }
+            });
+
+            // Pulses
+            for (let i = pulses.length - 1; i >= 0; i--) {
+                const p = pulses[i];
+                p.r += 5;
+                p.life -= 0.005;
+                if (p.life <= 0) pulses.splice(i, 1);
+            }
+
+            // Exit Check
+            const dist = Math.hypot(player.x - exit.x, player.y - exit.y);
+            if (dist < player.r + exit.r) {
+                winLevel();
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Pulses
+            ctx.lineWidth = 2;
+            pulses.forEach(p => {
+                ctx.strokeStyle = `rgba(255, 255, 255, ${p.life})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Echo off walls
+                walls.forEach(w => {
+                    // Clamped distance
+                    const cx = Math.max(w.x, Math.min(p.x, w.x + w.w));
+                    const cy = Math.max(w.y, Math.min(p.y, w.y + w.h));
+                    const dist = Math.hypot(cx - p.x, cy - p.y);
+                    
+                    if (dist < p.r && dist > p.r - 10) {
+                        // Use wall color but fade with pulse life
+                        ctx.fillStyle = w.color; // Simple color
+                        ctx.globalAlpha = p.life;
+                        ctx.fillRect(w.x, w.y, w.w, w.h);
+                        ctx.globalAlpha = 1.0;
+                    }
+                });
+                
+                // Echo off Exit
+                const distExit = Math.hypot(exit.x - p.x, exit.y - p.y);
+                if (distExit < p.r + exit.r && distExit > p.r - exit.r - 10) {
+                     ctx.fillStyle = `rgba(0, 255, 0, ${p.life})`; // Exit is green
+                     ctx.beginPath();
+                     ctx.arc(exit.x, exit.y, exit.r, 0, Math.PI * 2);
+                     ctx.fill();
+                }
+            });
+
+            // Draw Player (Visible ring)
+            ctx.globalAlpha = 0.5;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r + 5, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Hint at Exit (Faint Pulse)
+            ctx.fillStyle = `rgba(0, 255, 0, ${0.1 + Math.sin(Date.now() * 0.005) * 0.05})`;
+            ctx.beginPath();
+            ctx.arc(exit.x, exit.y, exit.r, 0, Math.PI * 2);
+            ctx.fill();
+
+            requestAnimationFrame(() => {
+                update();
+                draw();
+            });
+        }
+
+        function winLevel() {
+            winScreen.classList.add('visible');
+        }
+
+        window.nextLevel = function() {
+            winScreen.classList.remove('visible');
+            level++;
+            generateLevel(level);
+        };
+
+        resize();
+        draw();
+    </script>
+</body>
+</html>

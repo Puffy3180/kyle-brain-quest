@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a0a0c; color: #fff; font-family: 'Space Grotesk', sans-serif; touch-action: none; cursor: crosshair; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 40px; left: 0; width: 100%; text-align: center; pointer-events: none; mix-blend-mode: difference;}
+        h1 { margin: 0; text-transform: uppercase; color: #ff5252; font-size: 40px; font-weight: 800; letter-spacing: -2px;}
+        p { color: #888; font-size: 16px; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;}
+        .level-indicator { font-size: 24px; color: #ff5252; margin-top: 10px; font-weight: bold; opacity: 0; transition: opacity 0.5s; transform: scale(1.5); }
+        .level-indicator.show { opacity: 1; transform: scale(1); }
+        
+        #game-over {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 12, 0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            z-index: 100;
+        }
+        #game-over.visible { opacity: 1; pointer-events: auto; }
+        button { padding: 15px 40px; font-size: 18px; border: none; background: #ff5252; color: white; cursor: pointer; border-radius: 50px; margin-top: 20px; font-family: inherit; font-weight: bold; transition: transform 0.2s; }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 30px #ff5252; }
+        .back-link { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.3); text-decoration: none; z-index: 20; text-transform: uppercase; letter-spacing: 1px;}
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1 id="score">0.0s</h1>
+        <div id="level-display" class="level-indicator">STAGE 1</div>
+        <p>YOU ARE THE FOOD. RUN.</p>
+    </div>
+    <canvas id="game"></canvas>
+    
+    <div id="game-over">
+        <h1 style="font-size: 80px; margin-bottom: 10px;">EATEN</h1>
+        <p id="final-stats" style="color: white; font-size: 20px; text-align: center; line-height: 1.5;">Survived: 0s<br>Stage: 1</p>
+        <button onclick="initGame()">Respawn</button>
+        <a href="../../index.html" style="margin-top: 30px; color: #666; text-decoration: none;">Give Up</a>
+    </div>
+
+    <a href="../../index.html" class="back-link">Escape</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const levelDisplay = document.getElementById('level-display');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalStatsEl = document.getElementById('final-stats');
+
+        let width, height;
+        let player = { x: 0, y: 0 };
+        let snakes = [];
+        let obstacles = [];
+        let startTime;
+        let isPlaying = false;
+        let animationId;
+        let stage = 1;
+        let lastStageTime = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        document.addEventListener('mousemove', (e) => {
+            player.x = e.clientX;
+            player.y = e.clientY;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            player.x = e.touches[0].clientX;
+            player.y = e.touches[0].clientY;
+        }, { passive: false });
+
+        function createSnake(x, y, speed, length, color) {
+            let segments = [];
+            for(let i=0; i<length; i++)f segments.push({x, y});
+            return {
+                segments: segments,
+                speed: speed,
+                baseSpeed: speed,
+                length: length,
+                color: color || '#ff5252'
+            };
+        }
+
+        function createObstacles(count) {
+            obstacles = [];
+            for(let i=0; i<count; i++) {
+                obstacles.push({
+                    x: Math.random() * (width - 100) + 50,
+                    y: Math.random() * (height - 100) + 50,
+                    r: Math.random() * 30 + 20
+                });
+            }
+            // Ensure none spawn on player
+            obstacles = obstacles.filter(o => Math.hypot(o.x - player.x, o.y - player.y) > 200);
+        }
+
+        function initGame() {
+            isPlaying = true;
+            gameOverScreen.classList.remove('visible');
+            player.x = width / 2;
+            player.y = height / 2;
+            
+            snakes = [];
+            // Initial Snake
+            snakes.push(createSnake(-200, -200, 4, 30, '#ff5252'));
+            
+            createObstacles(3); // Start with 3 obstacles
+
+            startTime = Date.now();
+            stage = 1;
+            lastStageTime = 0;
+            
+            levelDisplay.textContent = "STAGE 1";
+            levelDisplay.classList.add('show');
+            setTimeout(() => levelDisplay.classList.remove('show'), 2000);
+
+            update();
+        }
+
+        function update() {
+            if (!isPlaying) return;
+
+            // Clear with trails
+            ctx.fillStyle = 'rgba(10, 10, 12, 0.2)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            // Time Score
+            const currentTime = Date.now();
+            const elapsed = ((currentTime - startTime) / 1000).toFixed(1);
+            scoreEl.textContent = `${elapsed}s`;
+
+            // Stage Logic
+            if (currentTime - startTime > lastStageTime + 10000) { // Every 10 seconds
+                stage++;
+                lastStageTime = currentTime - startTime;
+                
+                // Show Level Up
+                levelDisplay.textContent = `STAGE ${stage}`;
+                levelDisplay.classList.add('show');
+                setTimeout(() => levelDisplay.classList.remove('show'), 2000);
+
+                // Increase difficulty
+                snakes.forEach(s => {
+                    s.baseSpeed += 0.5;
+                    s.length += 10;
+                });
+
+                // Add obstacles
+                if (stage % 2 === 0) {
+                    obstacles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        r: Math.random() * 30 + 20
+                    });
+                }
+
+                // Add new snake every 2 stages
+                if (stage % 2 === 1) {
+                    const side = Math.floor(Math.random() * 4);
+                    let sx, sy;
+                    if(side===0) { sx = width/2; sy = -100; }
+                    else if(side===1) { sx = width/2; sy = height+100; }
+                    else if(side===2) { sx = -100; sy = height/2; }
+                    else { sx = width+100; sy = height/2; }
+                    
+                    snakes.push(createSnake(sx, sy, 3 + stage/2, 20, '#ff9f43'));
+                }
+            }
+
+            // Draw Obstacles
+            ctx.fillStyle = '#333';
+            obstacles.forEach(o => {
+                ctx.beginPath();
+                ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#444';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Player Collision with Obstacle
+                if (Math.hypot(player.x - o.x, player.y - o.y) < o.r + 10) {
+                    gameOver(elapsed, "CRASHED");
+                    return;
+                }
+            });
+
+            // Update & Draw Snakes
+            for(let s of snakes) {
+                const head = s.segments[0];
+                const dx = player.x - head.x;
+                const dy = player.y - head.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+
+                // Speed boost when close (Aggression)
+                let currentSpeed = s.baseSpeed;
+                if(distance < 300) currentSpeed *= 1.1;
+                
+                // Move head towards player
+                const angle = Math.atan2(dy, dx);
+                let vx = Math.cos(angle) * currentSpeed;
+                let vy = Math.sin(angle) * currentSpeed;
+
+                // Obstacle Avoidance for Snake (Simple)
+                obstacles.forEach(o => {
+                    const odx = head.x - o.x;
+                    const ody = head.y - o.y;
+                    const odist = Math.sqrt(odx*odx + ody*ody);
+                    if (odist < o.r + 50) {
+                        vx += (odx / odist) * 2;
+                        vy += (ody / odist) * 2;
+                    }
+                });
+
+                const newHead = {
+                    x: head.x + vx,
+                    y: head.y + vy
+                };
+
+                s.segments.unshift(newHead);
+                if (s.segments.length > s.length) {
+                    s.segments.pop();
+                }
+
+                // Draw Snake
+                ctx.beginPath();
+                ctx.strokeStyle = s.color;
+                ctx.lineWidth = 25;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.moveTo(s.segments[0].x, s.segments[0].y);
+                for (let i = 1; i < s.segments.length; i++) {
+                    ctx.lineTo(s.segments[i].x, s.segments[i].y);
+                }
+                ctx.stroke();
+
+                // Eyes
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(s.segments[0].x, s.segments[0].y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Collision
+                if (distance < 25) { 
+                    gameOver(elapsed, "EATEN");
+                    return;
+                }
+            }
+
+            // Draw Player (Glowing Food)
+            ctx.fillStyle = '#00ff00';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            animationId = requestAnimationFrame(update);
+        }
+
+        function gameOver(time, reason) {
+            isPlaying = false;
+            cancelAnimationFrame(animationId);
+            document.querySelector('#game-over h1').textContent = reason;
+            finalStatsEl.innerHTML = `Survived: ${time}s<br>Stage: ${stage}`;
+            gameOverScreen.classList.add('visible');
+        }
+
+        // Initialize offscreen
+        initGame();
+    </script>
+</body>
+</html>

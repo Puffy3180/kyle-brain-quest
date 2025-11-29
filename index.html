@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Trollverse - The Worst Best Website</title>
+    <title>smiles's website</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Bangers&family=Creepster&family=Monoton&family=Orbitron:wght@400;700&family=Permanent+Marker&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+    </script>
 </head>
 <body>
     <!-- Abstract Background Elements -->
@@ -35,7 +40,7 @@
     <div class="container" id="collections">
         <div class="bento-grid">
             <!-- Hero / Featured -->
-            <a href="pages/interactive/mind-reader.html" class="card span-2 span-row-2 featured">
+            <a href="games/mind/mind-reader.html" class="card span-2 span-row-2 featured" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-brain-line"></i></div>
                     <div class="card-title">Mind Reader</div>
@@ -43,7 +48,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/unclickable.html" class="card">
+            <a href="games/troll/unclickable.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-money-dollar-circle-line"></i></div>
                     <div class="card-title">Free Money</div>
@@ -51,7 +56,7 @@
                 </div>
             </a>
 
-            <a href="pages/visual/virus.html" class="card">
+            <a href="games/visual/virus.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-virus-line"></i></div>
                     <div class="card-title">System Update</div>
@@ -60,7 +65,7 @@
             </a>
 
             <!-- Standard Items -->
-            <a href="pages/interactive/password.html" class="card">
+            <a href="games/mind/password.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-lock-password-line"></i></div>
                     <div class="card-title">Password</div>
@@ -68,7 +73,7 @@
                 </div>
             </a>
             
-            <a href="pages/interactive/love.html" class="card">
+            <a href="games/troll/love.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-heart-pulse-line"></i></div>
                     <div class="card-title">Love Calc</div>
@@ -76,15 +81,7 @@
                 </div>
             </a>
 
-            <a href="pages/visual/infinity.html" class="card span-2">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-infinite-loop-line"></i></div>
-                    <div class="card-title">The Answer</div>
-                    <div class="card-desc">Scroll to find the meaning of life</div>
-                </div>
-            </a>
-
-            <a href="pages/interactive/iq.html" class="card">
+            <a href="games/mind/iq.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-lightbulb-flash-line"></i></div>
                     <div class="card-title">IQ Test</div>
@@ -92,7 +89,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/captcha.html" class="card">
+            <a href="games/troll/captcha.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-robot-line"></i></div>
                     <div class="card-title">Captcha</div>
@@ -100,7 +97,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/scream.html" class="card span-2">
+            <a href="games/troll/scream.html" class="card span-2" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-emotion-unhappy-line"></i></div>
                     <div class="card-title">Scream Therapy</div>
@@ -108,7 +105,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/ugly.html" class="card">
+            <a href="games/troll/ugly.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-ghost-line"></i></div>
                     <div class="card-title">Ugly Meter</div>
@@ -116,7 +113,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/volume.html" class="card">
+            <a href="games/troll/volume.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-volume-up-line"></i></div>
                     <div class="card-title">Volume</div>
@@ -124,15 +121,7 @@
                 </div>
             </a>
 
-            <a href="pages/visual/loading.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-loader-2-line"></i></div>
-                    <div class="card-title">Surprise</div>
-                    <div class="card-desc">Loading...</div>
-                </div>
-            </a>
-
-            <a href="pages/interactive/teleport.html" class="card span-row-2">
+            <a href="games/troll/teleport.html" class="card span-row-2" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-magic-line"></i></div>
                     <div class="card-title">Teleport</div>
@@ -140,15 +129,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/typing.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-keyboard-line"></i></div>
-                    <div class="card-title">Typing</div>
-                    <div class="card-desc">Speed test</div>
-                </div>
-            </a>
-
-            <a href="pages/interactive/date.html" class="card">
+            <a href="games/troll/date.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-calendar-line"></i></div>
                     <div class="card-title">Date</div>
@@ -156,7 +137,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/phone.html" class="card">
+            <a href="games/troll/phone.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-smartphone-line"></i></div>
                     <div class="card-title">Phone</div>
@@ -164,7 +145,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/calculator.html" class="card">
+            <a href="games/mind/calculator.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-calculator-line"></i></div>
                     <div class="card-title">Calc</div>
@@ -172,7 +153,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/age.html" class="card">
+            <a href="games/troll/age.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-user-3-line"></i></div>
                     <div class="card-title">Age</div>
@@ -180,15 +161,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/reaction.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-timer-flash-line"></i></div>
-                    <div class="card-title">Reflex</div>
-                    <div class="card-desc">Test speed</div>
-                </div>
-            </a>
-
-            <a href="pages/interactive/battery.html" class="card">
+            <a href="games/troll/battery.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-battery-charge-line"></i></div>
                     <div class="card-title">Battery</div>
@@ -196,7 +169,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/map.html" class="card">
+            <a href="games/troll/map.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-map-pin-line"></i></div>
                     <div class="card-title">Map</div>
@@ -204,7 +177,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/color.html" class="card">
+            <a href="games/mind/color.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-palette-line"></i></div>
                     <div class="card-title">Color</div>
@@ -212,7 +185,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/lottery.html" class="card">
+            <a href="games/troll/lottery.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-coupon-3-line"></i></div>
                     <div class="card-title">Lotto</div>
@@ -220,7 +193,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/spam.html" class="card">
+            <a href="games/troll/spam.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-gift-line"></i></div>
                     <div class="card-title">Winner</div>
@@ -228,7 +201,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/fortune.html" class="card">
+            <a href="games/troll/fortune.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-moon-line"></i></div>
                     <div class="card-title">Fortune</div>
@@ -236,7 +209,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/unsubscribe.html" class="card">
+            <a href="games/troll/unsubscribe.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-mail-close-line"></i></div>
                     <div class="card-title">Unsub</div>
@@ -244,7 +217,7 @@
                 </div>
             </a>
 
-            <a href="pages/interactive/terms.html" class="card">
+            <a href="games/troll/terms.html" class="card" data-category="troll">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-file-list-3-line"></i></div>
                     <div class="card-title">ToS</div>
@@ -252,191 +225,435 @@
                 </div>
             </a>
 
-            <a href="pages/visual/gravity.html" class="card">
+            <a href="games/visual/clean.html" class="card" data-category="visual">
                 <div class="card-content">
-                    <div class="card-icon"><i class="ri-earth-line"></i></div>
-                    <div class="card-title">Gravity</div>
-                    <div class="card-desc">Physics</div>
+                    <div class="card-icon"><i class="ri-brush-line"></i></div>
+                    <div class="card-title">Clean</div>
                 </div>
             </a>
 
-            <a href="pages/visual/dvd.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-disc-line"></i></div>
-                    <div class="card-title">DVD</div>
-                    <div class="card-desc">Bounce</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/dialup.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-router-line"></i></div>
-                    <div class="card-title">Dialup</div>
-                    <div class="card-desc">Slow</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/chat.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-chat-smile-2-line"></i></div>
-                    <div class="card-title">Chat</div>
-                    <div class="card-desc">Support</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/ram.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-download-cloud-2-line"></i></div>
-                    <div class="card-title">RAM</div>
-                    <div class="card-desc">Download</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/pixel.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
-                    <div class="card-title">Pixel</div>
-                    <div class="card-desc">Dead</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/mirror.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-layout-row-line"></i></div>
-                    <div class="card-title">Mirror</div>
-                    <div class="card-desc">Reflect</div>
-                </div>
-            </a>
-
-            <a href="pages/visual/horse.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-riding-line"></i></div>
-                    <div class="card-title">Horse</div>
-                    <div class="card-desc">Spin</div>
-                </div>
-            </a>
-
-            <a href="pages/interactive/bored.html" class="card span-2">
+            <a href="games/visual/bored.html" class="card span-2" data-category="visual">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-zzz-line"></i></div>
                     <div class="card-title">I Am Bored</div>
-                    <div class="card-desc">Entertainment for the desperate</div>
                 </div>
             </a>
 
-            <a href="pages/interactive/dodge.html" class="card span-2">
+            <a href="games/visual/gravity.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-earth-line"></i></div>
+                    <div class="card-title">Gravity</div>
+                </div>
+            </a>
+
+            <a href="games/visual/infinity.html" class="card span-2" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-infinite-loop-line"></i></div>
+                    <div class="card-title">The Answer</div>
+                </div>
+            </a>
+
+            <a href="games/visual/dvd.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-disc-line"></i></div>
+                    <div class="card-title">DVD</div>
+                </div>
+            </a>
+
+            <a href="games/visual/loading.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-loader-2-line"></i></div>
+                    <div class="card-title">Surprise</div>
+                </div>
+            </a>
+
+            <a href="games/visual/dialup.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-router-line"></i></div>
+                    <div class="card-title">Dialup</div>
+                </div>
+            </a>
+
+            <a href="games/visual/chat.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-chat-smile-2-line"></i></div>
+                    <div class="card-title">Chat</div>
+                </div>
+            </a>
+
+            <a href="games/visual/ram.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-download-cloud-2-line"></i></div>
+                    <div class="card-title">RAM</div>
+                </div>
+            </a>
+
+            <a href="games/visual/pixel.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
+                    <div class="card-title">Pixel</div>
+                </div>
+            </a>
+
+            <a href="games/visual/mirror.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-layout-row-line"></i></div>
+                    <div class="card-title">Mirror</div>
+                </div>
+            </a>
+
+            <a href="games/visual/horse.html" class="card" data-category="visual">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-riding-line"></i></div>
+                    <div class="card-title">Horse</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Arcade Section -->
+        <div class="section-header" style="display: block; margin-top: 80px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; margin-bottom: 60px;">
+            <h2>Arcade</h2>
+            <p style="color: var(--text-muted); font-size: 1.5rem;">Games. Some classic. Some... different.</p>
+        </div>
+
+        <!-- Category Selection Cards -->
+        <div class="category-grid" style="margin-bottom: 40px;">
+            <div class="card" onclick="toggleSection('skill')" style="cursor: pointer; --glow-color: #ff0000;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-sword-line"></i></div>
+                    <div class="card-title">Survival & Skill</div>
+                    <div class="card-desc">Test your reflexes</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleSection('classic')" style="cursor: pointer; --glow-color: #00b894;">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-gamepad-line"></i></div>
-                    <div class="card-title">Dodge Dots</div>
-                    <div class="card-desc">Survive the chaos</div>
+                    <div class="card-title">Classics</div>
+                    <div class="card-desc">Retro arcade games</div>
                 </div>
-            </a>
+            </div>
 
-            <a href="pages/interactive/fill.html" class="card span-2">
+            <div class="card" onclick="toggleSection('multiplayer')" style="cursor: pointer; --glow-color: #e056fd;">
                 <div class="card-content">
-                    <div class="card-icon"><i class="ri-bubble-chart-line"></i></div>
-                    <div class="card-title">Fill The Void</div>
-                    <div class="card-desc">Strategic bubble blowing</div>
+                    <div class="card-icon"><i class="ri-group-line"></i></div>
+                    <div class="card-title">2 Player</div>
+                    <div class="card-desc">Local Multiplayer</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleSection('strategy')" style="cursor: pointer; --glow-color: #f1c40f;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-chess-line"></i></div>
+                    <div class="card-title">Strategy</div>
+                    <div class="card-desc">Think to win</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategy Games Section -->
+        <div id="section-strategy" class="bento-grid game-section" style="display: none;">
+             <a href="games/strategy/defense.html" class="card" data-category="strategy" style="border: 2px solid #e17055;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-shield-cross-line"></i></div>
+                    <div class="card-title">Core Defense</div>
+                </div>
+            </a>
+             <a href="games/strategy/virus.html" class="card" data-category="strategy" style="border: 2px solid #00b894;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-virus-fill"></i></div>
+                    <div class="card-title">Virus Wars</div>
+                </div>
+            </a>
+             <a href="games/strategy/chain.html" class="card" data-category="strategy" style="border: 2px solid #6c5ce7;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-links-line"></i></div>
+                    <div class="card-title">Chain Reaction</div>
+                </div>
+            </a>
+             <a href="games/strategy/mines.html" class="card" data-category="strategy" style="border: 2px solid #fdcb6e;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
+                    <div class="card-title">Neon Mines</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Skill Games Section -->
+        <div id="section-skill" class="bento-grid game-section" style="display: none;">
+            <a href="games/skill/shadow.html" class="card" data-category="skill" style="background: #000; border: 2px solid #fff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-ghost-2-line"></i></div>
+                    <div class="card-title">Shadow Leap</div>
                 </div>
             </a>
 
-            <a href="pages/interactive/polka.html" class="card span-2">
+            <a href="games/skill/frequency.html" class="card" data-category="skill" style="border: 2px solid #0f0;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-pulse-line"></i></div>
+                    <div class="card-title">Frequency</div>
+                </div>
+            </a>
+
+            <a href="games/skill/survival.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-focus-2-line"></i></div>
+                    <div class="card-title">Survival</div>
+                </div>
+            </a>
+
+            <a href="games/skill/prey.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-snake-line"></i></div>
+                    <div class="card-title">Prey</div>
+                </div>
+            </a>
+
+            <a href="games/skill/orbit.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-planet-line"></i></div>
+                    <div class="card-title">Orbit</div>
+                </div>
+            </a>
+
+            <a href="games/skill/echo.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-radar-line"></i></div>
+                    <div class="card-title">Echo</div>
+                </div>
+            </a>
+            
+            <a href="games/arcade/shift.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-arrow-up-down-line"></i></div>
+                    <div class="card-title">Shift</div>
+                </div>
+            </a>
+
+            <a href="games/skill/polka.html" class="card" data-category="skill">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-focus-3-line"></i></div>
                     <div class="card-title">Polka Dot</div>
-                    <div class="card-desc">Eat small, avoid big</div>
                 </div>
             </a>
 
-            <a href="pages/interactive/circle.html" class="card">
+            <a href="games/skill/fill.html" class="card" data-category="skill">
                 <div class="card-content">
-                    <div class="card-icon"><i class="ri-record-circle-line"></i></div>
-                    <div class="card-title">Circle Stop</div>
-                    <div class="card-desc">Perfect timing</div>
+                    <div class="card-icon"><i class="ri-bubble-chart-line"></i></div>
+                    <div class="card-title">Fill The Void</div>
+                </div>
+            </a>
+
+            <a href="games/skill/typing.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-keyboard-line"></i></div>
+                    <div class="card-title">Typing</div>
+                </div>
+            </a>
+
+            <a href="games/skill/reaction.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-timer-flash-line"></i></div>
+                    <div class="card-title">Reflex</div>
+                </div>
+            </a>
+
+            <a href="games/skill/draw.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-pencil-ruler-2-line"></i></div>
+                    <div class="card-title">Gravity Brush</div>
+                </div>
+            </a>
+
+            <a href="games/skill/fit.html" class="card" data-category="skill">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-shape-line"></i></div>
+                    <div class="card-title">Shape Shift</div>
+                </div>
+            </a>
+
+            <a href="games/skill/time.html" class="card" data-category="skill" style="background: #fff; color: #000; border: 2px solid #000;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-time-line"></i></div>
+                    <div class="card-title">Time Shift</div>
+                </div>
+            </a>
+
+            <a href="games/skill/magnet.html" class="card" data-category="skill" style="background: #2d3436; border-left: 5px solid #ff7675; border-right: 5px solid #74b9ff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-magnet-line"></i></div>
+                    <div class="card-title">Magnet</div>
+                </div>
+            </a>
+
+            <a href="games/mind/split.html" class="card" data-category="mind" style="background: linear-gradient(90deg, #0984e3 50%, #d63031 50%); color: #fff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-split-cells-horizontal"></i></div>
+                    <div class="card-title">Split Brain</div>
                 </div>
             </a>
         </div>
 
-        <div class="section-header" style="display: block; margin-top: 80px;">
-            <h2>Troll Arcade</h2>
-            <p>Classic games. No trolling. (Maybe)</p>
+        <!-- Multiplayer Section -->
+        <div id="section-multiplayer" class="bento-grid game-section" style="display: none;">
+            <a href="games/multiplayer/pong.html" class="card" data-category="multiplayer" style="border: 2px solid #ff00ff; box-shadow: 0 0 10px #ff00ff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-ping-pong-line"></i></div>
+                    <div class="card-title">Neon Pong</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/tanks.html" class="card" data-category="multiplayer" style="border: 2px solid #00ff00; background: #111;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-car-line"></i></div>
+                    <div class="card-title">Cyber Tanks</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/tron.html" class="card" data-category="multiplayer" style="border: 2px solid #00ffff; box-shadow: 0 0 15px #00ffff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-bike-line"></i></div>
+                    <div class="card-title">Tron Trails</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/tug.html" class="card" data-category="multiplayer" style="border-left: 5px solid #ff0000; border-right: 5px solid #0000ff;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-drag-drop-line"></i></div>
+                    <div class="card-title">Tug of War</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/sumo.html" class="card" data-category="multiplayer" style="border: 2px solid #ff9f43; border-radius: 50% 50% 10px 10px;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-checkbox-blank-circle-line"></i></div>
+                    <div class="card-title">Sumo Smash</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/shooter.html" class="card" data-category="multiplayer" style="border: 2px solid #ff9ff3;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-crosshair-2-line"></i></div>
+                    <div class="card-title">Space Duel</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/tag.html" class="card" data-category="multiplayer" style="border: 2px solid #feca57;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-run-line"></i></div>
+                    <div class="card-title">Pixel Tag</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/soccer.html" class="card" data-category="multiplayer" style="border: 2px solid #54a0ff; background: #2f3542;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-football-line"></i></div>
+                    <div class="card-title">Micro Soccer</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/race.html" class="card" data-category="multiplayer" style="border: 2px solid #5f27cd; background: linear-gradient(90deg, #5f27cd 50%, #a29bfe 50%);">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-flag-line"></i></div>
+                    <div class="card-title">Speed Run</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/rps.html" class="card" data-category="multiplayer" style="border: 2px solid #c8d6e5; color: #2d3436; background: #dfe6e9;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-scissors-line"></i></div>
+                    <div class="card-title">RPS Battle</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/jet.html" class="card" data-category="multiplayer" style="border: 2px solid #e55039; background: #0a3d62;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-plane-line"></i></div>
+                    <div class="card-title">Jet Fight</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/snake.html" class="card" data-category="multiplayer" style="border: 2px solid #00b894;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-snake-line"></i></div>
+                    <div class="card-title">Snake Battle</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/curve.html" class="card" data-category="multiplayer" style="border: 2px solid #2980b9;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-football-line"></i></div>
+                    <div class="card-title">Curve Ball</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/basket.html" class="card" data-category="multiplayer" style="border: 2px solid #f39c12;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-basketball-line"></i></div>
+                    <div class="card-title">Basket Battle</div>
+                </div>
+            </a>
+            <a href="games/multiplayer/ninja.html" class="card" data-category="multiplayer" style="border: 2px solid #636e72; background: #2d3436;">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-sword-fill"></i></div>
+                    <div class="card-title">Ninja Duel</div>
+                </div>
+            </a>
         </div>
 
-        <div class="bento-grid">
-            <a href="pages/arcade/snake.html" class="card">
+        <!-- Classic Games Section -->
+        <div id="section-classic" class="bento-grid game-section" style="display: none;">
+            <a href="games/arcade/snake.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-bug-line"></i></div>
                     <div class="card-title">Snake</div>
-                    <div class="card-desc">Classic</div>
                 </div>
             </a>
-            <a href="pages/arcade/pong.html" class="card">
+            <a href="games/arcade/pong.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-ping-pong-line"></i></div>
                     <div class="card-title">Pong</div>
-                    <div class="card-desc">Retro</div>
                 </div>
             </a>
-            <a href="pages/arcade/stack.html" class="card">
+            <a href="games/arcade/stack.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-stack-line"></i></div>
                     <div class="card-title">Stacker</div>
-                    <div class="card-desc">Build High</div>
                 </div>
             </a>
-            <a href="pages/arcade/simon.html" class="card">
+            <a href="games/mind/simon.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-lightbulb-line"></i></div>
                     <div class="card-title">Simon</div>
-                    <div class="card-desc">Memory</div>
                 </div>
             </a>
-            <a href="pages/arcade/flappy.html" class="card">
+            <a href="games/arcade/flappy.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-flight-takeoff-line"></i></div>
                     <div class="card-title">Flappy</div>
-                    <div class="card-desc">Jump</div>
                 </div>
             </a>
-            <a href="pages/arcade/whack.html" class="card">
+            <a href="games/arcade/whack.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-hammer-line"></i></div>
                     <div class="card-title">Whack</div>
-                    <div class="card-desc">Bonk</div>
                 </div>
             </a>
-            <a href="pages/arcade/maze.html" class="card">
+            <a href="games/arcade/maze.html" class="card" data-category="mind">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-drag-move-line"></i></div>
                     <div class="card-title">Maze</div>
-                    <div class="card-desc">Steady</div>
                 </div>
             </a>
-            <a href="pages/arcade/runner.html" class="card">
+            <a href="games/arcade/runner.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-run-line"></i></div>
                     <div class="card-title">Dino</div>
-                    <div class="card-desc">Run</div>
                 </div>
             </a>
-            <a href="pages/arcade/space.html" class="card">
+            <a href="games/arcade/space.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-rocket-line"></i></div>
                     <div class="card-title">Space</div>
-                    <div class="card-desc">Shoot</div>
                 </div>
             </a>
-            <a href="pages/arcade/breakout.html" class="card">
+            <a href="games/arcade/breakout.html" class="card" data-category="arcade">
                 <div class="card-content">
                     <div class="card-icon"><i class="ri-layout-grid-line"></i></div>
                     <div class="card-title">Breakout</div>
-                    <div class="card-desc">Smash</div>
                 </div>
             </a>
         </div>
-    </div>
-    
-    <footer class="site-footer">
+
+        <!-- Classic Games Section -->
+        <div id="section-classic" class="bento-grid game-section" style="display: none;">
         <p>© 2025 Trollverse Inc. All rights reserved (not really).</p>
         <div class="footer-links">
             <a href="#" onclick="alert('Legal action pending')">Legal</a>
@@ -447,30 +664,46 @@
 
     <script src="assets/js/troll-network.js"></script>
     <script>
-        // Random Navigation Functions
+        // Scroll Position Handling
+        window.addEventListener('scroll', () => {
+            sessionStorage.setItem('scrollPos', window.scrollY);
+        });
+
+        window.addEventListener('load', () => {
+            const scrollPos = sessionStorage.getItem('scrollPos');
+            if (scrollPos) {
+                setTimeout(() => window.scrollTo(0, parseInt(scrollPos)), 0);
+            }
+        });
+
+        // Random Navigation Functions - UPDATED PATHS
         const interactivePages = [
-            'pages/interactive/mind-reader.html', 'pages/interactive/unclickable.html',
-            'pages/interactive/password.html', 'pages/interactive/love.html',
-            'pages/interactive/iq.html', 'pages/interactive/captcha.html',
-            'pages/interactive/scream.html', 'pages/interactive/ugly.html',
-            'pages/interactive/volume.html', 'pages/interactive/teleport.html',
-            'pages/interactive/typing.html', 'pages/interactive/date.html',
-            'pages/interactive/phone.html', 'pages/interactive/calculator.html',
-            'pages/interactive/age.html', 'pages/interactive/reaction.html',
-            'pages/interactive/battery.html', 'pages/interactive/map.html',
-            'pages/interactive/color.html', 'pages/interactive/lottery.html',
-            'pages/interactive/spam.html', 'pages/interactive/fortune.html',
-            'pages/interactive/unsubscribe.html', 'pages/interactive/terms.html',
-            'pages/interactive/bored.html'
+            'games/mind/mind-reader.html', 'games/troll/unclickable.html',
+            'games/mind/password.html', 'games/troll/love.html',
+            'games/mind/iq.html', 'games/troll/captcha.html',
+            'games/troll/scream.html', 'games/troll/ugly.html',
+            'games/troll/volume.html', 'games/troll/teleport.html',
+            'games/skill/typing.html', 'games/troll/date.html',
+            'games/troll/phone.html', 'games/mind/calculator.html',
+            'games/troll/age.html', 'games/skill/reaction.html',
+            'games/troll/battery.html', 'games/troll/map.html',
+            'games/mind/color.html', 'games/troll/lottery.html',
+            'games/troll/spam.html', 'games/troll/fortune.html',
+            'games/troll/unsubscribe.html', 'games/troll/terms.html',
+            'games/visual/bored.html',
+            'games/skill/survival.html', 'games/skill/prey.html',
+            'games/visual/clean.html', 'games/skill/orbit.html',
+            'games/skill/echo.html',
+            'games/skill/shadow.html', 'games/skill/frequency.html'
         ];
 
         const visualPages = [
-            'pages/visual/virus.html', 'pages/visual/infinity.html',
-            'pages/visual/loading.html', 'pages/visual/gravity.html',
-            'pages/visual/dvd.html', 'pages/visual/dialup.html',
-            'pages/visual/chat.html', 'pages/visual/ram.html',
-            'pages/visual/pixel.html', 'pages/visual/mirror.html',
-            'pages/visual/horse.html'
+            'games/visual/virus.html', 'games/visual/infinity.html',
+            'games/visual/loading.html', 'games/visual/gravity.html',
+            'games/visual/dvd.html', 'games/visual/dialup.html',
+            'games/visual/chat.html', 'games/visual/ram.html',
+            'games/visual/pixel.html', 'games/visual/mirror.html',
+            'games/visual/horse.html'
         ];
 
         function randomInteractive() {
@@ -487,6 +720,25 @@
             const allPages = [...interactivePages, ...visualPages];
             const page = allPages[Math.floor(Math.random() * allPages.length)];
             window.location.href = page;
+        }
+
+        function toggleSection(sectionName) {
+            const sections = ['skill', 'classic', 'multiplayer', 'strategy'];
+            
+            // Toggle the clicked section
+            const target = document.getElementById('section-' + sectionName);
+            const isHidden = target.style.display === 'none';
+            
+            // Hide all sections first
+            sections.forEach(s => {
+                document.getElementById('section-' + s).style.display = 'none';
+            });
+
+            // If it was hidden, show it. If it was shown, it's now hidden (toggle behavior).
+            // The user said "expands below".
+            if (isHidden) {
+                target.style.display = 'grid';
+            }
         }
     </script>
 </body>

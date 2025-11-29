@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Split Brain</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #2d3436; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        #game-container { display: flex; width: 100vw; height: 100vh; }
+        .side { flex: 1; position: relative; overflow: hidden; }
+        #left { background: #0984e3; border-right: 2px solid #fff; }
+        #right { background: #d63031; }
+        
+        .player { position: absolute; width: 30px; height: 30px; background: #fff; transition: transform 0.05s linear; }
+        .obstacle { position: absolute; width: 30px; height: 30px; background: #000; }
+        
+        #ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        h1 { font-size: 3rem; margin: 0; text-shadow: 2px 2px 0 #000; }
+        p { font-size: 1.2rem; text-shadow: 1px 1px 0 #000; }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 200;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../../index.html'">← Back</button>
+
+    <div id="ui">
+        <h1 id="title">SPLIT BRAIN</h1>
+        <p id="msg">WASD for Blue | ARROWS for Red<br>Dodge the Black Squares</p>
+        <p id="score">Score: 0</p>
+    </div>
+
+    <div id="game-container">
+        <div id="left" class="side">
+            <div id="p1" class="player" style="left: 50%; top: 80%;"></div>
+        </div>
+        <div id="right" class="side">
+            <div id="p2" class="player" style="left: 50%; top: 80%;"></div>
+        </div>
+    </div>
+
+    <script>
+        const p1 = document.getElementById('p1');
+        const p2 = document.getElementById('p2');
+        const leftDiv = document.getElementById('left');
+        const rightDiv = document.getElementById('right');
+        const title = document.getElementById('title');
+        const msg = document.getElementById('msg');
+        const scoreEl = document.getElementById('score');
+
+        let gameRunning = false;
+        let score = 0;
+        let speed = 5;
+        
+        let pos1 = { x: 50, y: 80 }; // Percentage
+        let pos2 = { x: 50, y: 80 };
+        
+        let obstacles1 = [];
+        let obstacles2 = [];
+        
+        let keys = {};
+
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if(!gameRunning && e.code === 'Space') startGame();
+        });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            speed = 5;
+            pos1 = { x: 50, y: 80 };
+            pos2 = { x: 50, y: 80 };
+            obstacles1 = [];
+            obstacles2 = [];
+            // Clear DOM obstacles
+            document.querySelectorAll('.obstacle').forEach(e => e.remove());
+            
+            title.style.display = 'none';
+            msg.style.display = 'none';
+            
+            loop();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            title.style.display = 'block';
+            title.innerText = "CRASHED";
+            msg.style.display = 'block';
+            msg.innerText = "Space to Restart";
+        }
+
+        function spawnObstacle(side) {
+            const el = document.createElement('div');
+            el.className = 'obstacle';
+            // Random X pos (0-90%)
+            const x = Math.random() * 90;
+            el.style.left = x + '%';
+            el.style.top = '-10%';
+            
+            if(side === 1) {
+                leftDiv.appendChild(el);
+                obstacles1.push({ el, x, y: -10 });
+            } else {
+                rightDiv.appendChild(el);
+                obstacles2.push({ el, x, y: -10 });
+            }
+        }
+
+        function update() {
+            if(!gameRunning) return;
+
+            // Player 1 (WASD) - Blue Side
+            if(keys['KeyA']) pos1.x -= 1;
+            if(keys['KeyD']) pos1.x += 1;
+            // Clamp
+            pos1.x = Math.max(0, Math.min(90, pos1.x));
+            p1.style.left = pos1.x + '%';
+
+            // Player 2 (Arrows) - Red Side
+            if(keys['ArrowLeft']) pos2.x -= 1;
+            if(keys['ArrowRight']) pos2.x += 1;
+            pos2.x = Math.max(0, Math.min(90, pos2.x));
+            p2.style.left = pos2.x + '%';
+
+            // Spawning
+            if(Math.random() < 0.03 + (score/3000)) spawnObstacle(1); // More obstacles
+            if(Math.random() < 0.03 + (score/3000)) spawnObstacle(2);
+
+            // Move Obstacles & Collision
+            // Side 1
+            for(let i = obstacles1.length - 1; i >= 0; i--) {
+                let obs = obstacles1[i];
+                obs.y += 0.8 + (score/1000); // Faster fall speed
+                obs.el.style.top = obs.y + '%';
+                
+                // Collision (Approx percentage overlap)
+                // Player is at 80% Y, 30px height (~5% screen height?)
+                // Let's say collision box is Y 80-85, X pos1.x to pos1.x+5
+                // Obs is Y obs.y to obs.y+5, X obs.x to obs.x+5
+                
+                if(obs.y > 75 && obs.y < 85) {
+                    if(Math.abs(obs.x - pos1.x) < 5) gameOver();
+                }
+                
+                if(obs.y > 100) {
+                    obs.el.remove();
+                    obstacles1.splice(i, 1);
+                    score++;
+                }
+            }
+
+            // Side 2
+            for(let i = obstacles2.length - 1; i >= 0; i--) {
+                let obs = obstacles2[i];
+                obs.y += 0.8 + (score/1000);
+                obs.el.style.top = obs.y + '%';
+                
+                if(obs.y > 75 && obs.y < 85) {
+                    if(Math.abs(obs.x - pos2.x) < 5) gameOver();
+                }
+                
+                if(obs.y > 100) {
+                    obs.el.remove();
+                    obstacles2.splice(i, 1);
+                    score++;
+                }
+            }
+            
+            scoreEl.innerText = "Score: " + score;
+            requestAnimationFrame(update);
+        }
+
+        function loop() {
+            update();
+        }
+
+        // Initial msg update
+        msg.innerHTML += "<br><span style='font-size:0.8em'>Press Space to Start</span>";
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jet Fight (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a3d62; color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { background: #000; border: 2px solid #fff; }
+        .ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 50px; font-size: 1.5rem; pointer-events: none; }
+        .back-btn { position: absolute; bottom: 20px; color: #aaa; text-decoration: none; pointer-events: auto; }
+        #winner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; display: none; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div style="color: #e55039">P1: W (Thrust) | A (Left) | D (Right) | S (Shoot)</div>
+        <div style="color: #4a69bd">P2: UP (Thrust) | LEFT | RIGHT | DOWN (Shoot)</div>
+    </div>
+    <h1 id="winner">P1 WINS!</h1>
+    <canvas id="game" width="800" height="600"></canvas>
+    <a href="../../index.html" class="back-btn">Eject</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const winnerEl = document.getElementById('winner');
+
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        class Jet {
+            constructor(x, y, color, controls) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.angle = -Math.PI/2; // Facing up
+                this.color = color;
+                this.controls = controls;
+                this.bullets = [];
+                this.alive = true;
+                this.cooldown = 0;
+                this.score = 0;
+            }
+
+            update() {
+                if (!this.alive) return;
+
+                // Turn
+                if (keys[this.controls.left]) this.angle -= 0.1;
+                if (keys[this.controls.right]) this.angle += 0.1;
+
+                // Thrust
+                if (keys[this.controls.up]) {
+                    this.vx += Math.cos(this.angle) * 0.2;
+                    this.vy += Math.sin(this.angle) * 0.2;
+                    
+                    // Thruster particles?
+                }
+
+                // Gravity
+                this.vy += 0.05;
+
+                // Move
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Drag
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
+                // Screen Wrap
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+
+                // Shoot
+                if (this.cooldown > 0) this.cooldown--;
+                if (keys[this.controls.shoot] && this.cooldown <= 0) {
+                    this.bullets.push({
+                        x: this.x + Math.cos(this.angle) * 15,
+                        y: this.y + Math.sin(this.angle) * 15,
+                        vx: this.vx + Math.cos(this.angle) * 10,
+                        vy: this.vy + Math.sin(this.angle) * 10,
+                        life: 100
+                    });
+                    this.cooldown = 10;
+                }
+
+                // Update Bullets
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    let b = this.bullets[i];
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    b.life--;
+                    
+                    // Wrap
+                    if (b.x < 0) b.x = canvas.width;
+                    if (b.x > canvas.width) b.x = 0;
+                    if (b.y < 0) b.y = canvas.height;
+                    if (b.y > canvas.height) b.y = 0;
+
+                    if (b.life <= 0) this.bullets.splice(i, 1);
+                }
+            }
+
+            draw() {
+                if (!this.alive) return;
+
+                // Bullets
+                ctx.fillStyle = '#fff';
+                this.bullets.forEach(b => {
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, 2, 0, Math.PI*2);
+                    ctx.fill();
+                });
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(15, 0);
+                ctx.lineTo(-10, -10);
+                ctx.lineTo(-5, 0);
+                ctx.lineTo(-10, 10);
+                ctx.closePath();
+                ctx.fill();
+
+                // Flame if thrusting
+                if (keys[this.controls.up]) {
+                    ctx.fillStyle = '#f0932b';
+                    ctx.beginPath();
+                    ctx.moveTo(-8, 0);
+                    ctx.lineTo(-20, -5);
+                    ctx.lineTo(-25, 0);
+                    ctx.lineTo(-20, 5);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        const p1 = new Jet(100, 300, '#e55039', { up: 'KeyW', left: 'KeyA', right: 'KeyD', shoot: 'KeyS' });
+        const p2 = new Jet(700, 300, '#4a69bd', { up: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', shoot: 'ArrowDown' });
+
+        let running = true;
+
+        function gameOver(winner) {
+            running = false;
+            winnerEl.innerText = winner + " WINS!";
+            winnerEl.style.display = 'block';
+            setTimeout(() => {
+                running = true;
+                winnerEl.style.display = 'none';
+                p1.alive = true; p2.alive = true;
+                p1.x = 100; p1.y = 300; p1.vx = 0; p1.vy = 0; p1.angle = -Math.PI/2;
+                p2.x = 700; p2.y = 300; p2.vx = 0; p2.vy = 0; p2.angle = -Math.PI/2;
+                p1.bullets = []; p2.bullets = [];
+            }, 2000);
+        }
+
+        function update() {
+            if (!running) return;
+
+            p1.update();
+            p2.update();
+
+            // Hit Detection
+            p1.bullets.forEach(b => {
+                if (p2.alive && Math.hypot(b.x - p2.x, b.y - p2.y) < 15) {
+                    p2.alive = false;
+                    p1.score++;
+                    gameOver("P1");
+                }
+            });
+
+            p2.bullets.forEach(b => {
+                if (p1.alive && Math.hypot(b.x - p1.x, b.y - p1.y) < 15) {
+                    p1.alive = false;
+                    p2.score++;
+                    gameOver("P2");
+                }
+            });
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            p1.draw();
+            p2.draw();
+
+            // Scores
+            ctx.fillStyle = '#fff';
+            ctx.font = "20px Space Grotesk";
+            ctx.fillText(p1.score, 20, 30);
+            ctx.fillText(p2.score, 760, 30);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+</html>

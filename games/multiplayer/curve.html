@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Curve Ball (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #2c3e50; color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { background: #ecf0f1; box-shadow: 0 0 30px rgba(0,0,0,0.3); }
+        .ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 50px; font-size: 1.5rem; pointer-events: none; color: #333; }
+        .back-btn { position: absolute; bottom: 20px; color: #fff; text-decoration: none; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div style="color: #e74c3c">P1: A / D</div>
+        <div style="color: #2980b9">P2: LEFT / RIGHT</div>
+    </div>
+    
+    <canvas id="game" width="600" height="800"></canvas>
+    <a href="../../index.html" class="back-btn">Stop Spin</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        // Based on classic Pong but with curve physics (Magnus effect)
+        // Vertical layout: P1 Bottom, P2 Top
+
+        const p1 = { x: 250, y: 750, w: 100, h: 10, color: '#e74c3c', score: 0 };
+        const p2 = { x: 250, y: 40, w: 100, h: 10, color: '#2980b9', score: 0 };
+        
+        const ball = { x: 300, y: 400, r: 8, vx: 0, vy: 5, spin: 0 };
+        
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function resetBall(winner) {
+            ball.x = 300; ball.y = 400; ball.spin = 0;
+            ball.vx = 0;
+            ball.vy = (winner === 'p1') ? -5 : 5; // Loser serves
+        }
+
+        function update() {
+            const speed = 7;
+            // P1 (Bottom)
+            if (keys['KeyA']) p1.x -= speed;
+            if (keys['KeyD']) p1.x += speed;
+
+            // P2 (Top)
+            if (keys['ArrowLeft']) p2.x -= speed;
+            if (keys['ArrowRight']) p2.x += speed;
+
+            // Bounds
+            [p1, p2].forEach(p => {
+                p.x = Math.max(0, Math.min(canvas.width - p.w, p.x));
+            });
+
+            // Ball Physics
+            // Magnus Effect: Spin creates horizontal force
+            ball.vx += ball.spin * 0.05; 
+            ball.spin *= 0.99; // Spin decay
+
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // Wall Bounce (Left/Right)
+            if (ball.x < 0 || ball.x > canvas.width) {
+                ball.vx *= -1;
+                ball.spin *= 0.8; // Lose spin on bounce
+            }
+
+            // Paddles
+            // P1
+            if (ball.y + ball.r > p1.y && ball.y - ball.r < p1.y + p1.h &&
+                ball.x > p1.x && ball.x < p1.x + p1.w) {
+                ball.vy = -Math.abs(ball.vy) - 0.5; // Bounce up + speed
+                // Add Spin based on paddle movement and hit location
+                let hitPos = (ball.x - (p1.x + p1.w/2)) / (p1.w/2); // -1 to 1
+                ball.spin = hitPos * 5 + (keys['KeyA'] ? -3 : 0) + (keys['KeyD'] ? 3 : 0);
+                ball.vx += hitPos * 2;
+            }
+
+            // P2
+            if (ball.y - ball.r < p2.y + p2.h && ball.y + ball.r > p2.y &&
+                ball.x > p2.x && ball.x < p2.x + p2.w) {
+                ball.vy = Math.abs(ball.vy) + 0.5; // Bounce down
+                let hitPos = (ball.x - (p2.x + p2.w/2)) / (p2.w/2);
+                ball.spin = hitPos * 5 + (keys['ArrowLeft'] ? -3 : 0) + (keys['ArrowRight'] ? 3 : 0);
+                ball.vx += hitPos * 2;
+            }
+
+            // Scoring
+            if (ball.y < 0) {
+                p1.score++;
+                resetBall('p1');
+            }
+            if (ball.y > canvas.height) {
+                p2.score++;
+                resetBall('p2');
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = '#ecf0f1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Center Line
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.beginPath();
+            ctx.moveTo(0, 400); ctx.lineTo(600, 400);
+            ctx.stroke();
+
+            // Paddles
+            ctx.fillStyle = p1.color;
+            ctx.fillRect(p1.x, p1.y, p1.w, p1.h);
+            
+            ctx.fillStyle = p2.color;
+            ctx.fillRect(p2.x, p2.y, p2.w, p2.h);
+
+            // Ball
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+            ctx.fill();
+
+            // Scores
+            ctx.font = "40px Space Grotesk";
+            ctx.fillStyle = '#333';
+            ctx.save();
+            ctx.translate(50, 380);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText(p2.score, 0, 0);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(50, 420);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText(p1.score, -40, 0);
+            ctx.restore();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
+</body>
+</html>

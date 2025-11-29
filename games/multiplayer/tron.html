@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tron Trails (2P)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { border: 2px solid #0ff; background: #000; box-shadow: 0 0 30px #0ff; }
+        .ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 50px; font-size: 1.5rem; pointer-events: none; }
+        .back-btn { position: absolute; bottom: 20px; color: #555; text-decoration: none; pointer-events: auto; }
+        #winner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; display: none; text-shadow: 0 0 20px #fff; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div style="color: #ff00ff">P1: WASD</div>
+        <div style="color: #00ffff">P2: ARROWS</div>
+    </div>
+    
+    <h1 id="winner">P1 WINS</h1>
+    <canvas id="game" width="800" height="600"></canvas>
+    
+    <a href="../../index.html" class="back-btn">Exit Grid</a>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const winnerEl = document.getElementById('winner');
+
+        const GRID_SIZE = 5;
+        const width = canvas.width / GRID_SIZE;
+        const height = canvas.height / GRID_SIZE;
+
+        let grid = new Array(width * height).fill(0); // 0: Empty, 1: P1, 2: P2
+        let running = true;
+
+        const p1 = { x: 10, y: height/2, dx: 1, dy: 0, color: '#ff00ff', nextDx: 1, nextDy: 0, score: 0 };
+        const p2 = { x: width-10, y: height/2, dx: -1, dy: 0, color: '#00ffff', nextDx: -1, nextDy: 0, score: 0 };
+
+        document.addEventListener('keydown', e => {
+            // P1
+            if (e.code === 'KeyW' && p1.dy === 0) { p1.nextDx = 0; p1.nextDy = -1; }
+            if (e.code === 'KeyS' && p1.dy === 0) { p1.nextDx = 0; p1.nextDy = 1; }
+            if (e.code === 'KeyA' && p1.dx === 0) { p1.nextDx = -1; p1.nextDy = 0; }
+            if (e.code === 'KeyD' && p1.dx === 0) { p1.nextDx = 1; p1.nextDy = 0; }
+
+            // P2
+            if (e.code === 'ArrowUp' && p2.dy === 0) { p2.nextDx = 0; p2.nextDy = -1; }
+            if (e.code === 'ArrowDown' && p2.dy === 0) { p2.nextDx = 0; p2.nextDy = 1; }
+            if (e.code === 'ArrowLeft' && p2.dx === 0) { p2.nextDx = -1; p2.nextDy = 0; }
+            if (e.code === 'ArrowRight' && p2.dx === 0) { p2.nextDx = 1; p2.nextDy = 0; }
+            
+            if (!running && e.code === 'Space') resetGame();
+        });
+
+        function resetGame() {
+            grid.fill(0);
+            p1.x = 10; p1.y = Math.floor(height/2);
+            p1.dx = 1; p1.dy = 0;
+            p1.nextDx = 1; p1.nextDy = 0;
+
+            p2.x = width-10; p2.y = Math.floor(height/2);
+            p2.dx = -1; p2.dy = 0;
+            p2.nextDx = -1; p2.nextDy = 0;
+
+            running = true;
+            winnerEl.style.display = 'none';
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gameOver(winner) {
+            running = false;
+            winnerEl.innerText = winner + " WINS!";
+            winnerEl.style.color = winner === "P1" ? p1.color : p2.color;
+            winnerEl.style.display = 'block';
+        }
+
+        function update() {
+            if (!running) return;
+
+            [p1, p2].forEach(p => {
+                p.dx = p.nextDx;
+                p.dy = p.nextDy;
+                p.x += p.dx;
+                p.y += p.dy;
+            });
+
+            // Collision Check
+            let p1Dead = false;
+            let p2Dead = false;
+
+            // Bounds
+            if (p1.x < 0 || p1.x >= width || p1.y < 0 || p1.y >= height) p1Dead = true;
+            if (p2.x < 0 || p2.x >= width || p2.y < 0 || p2.y >= height) p2Dead = true;
+
+            // Trails
+            if (!p1Dead && grid[p1.y * width + p1.x] !== 0) p1Dead = true;
+            if (!p2Dead && grid[p2.y * width + p2.x] !== 0) p2Dead = true;
+            
+            // Head on
+            if (p1.x === p2.x && p1.y === p2.y) { p1Dead = true; p2Dead = true; }
+
+            if (p1Dead && p2Dead) gameOver("DRAW");
+            else if (p1Dead) gameOver("P2");
+            else if (p2Dead) gameOver("P1");
+
+            if (!running) return;
+
+            // Mark grid
+            grid[p1.y * width + p1.x] = 1;
+            grid[p2.y * width + p2.x] = 2;
+
+            draw();
+        }
+
+        function draw() {
+            // Only draw new segments
+            ctx.fillStyle = p1.color;
+            ctx.fillRect(p1.x * GRID_SIZE, p1.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+            
+            ctx.fillStyle = p2.color;
+            ctx.fillRect(p2.x * GRID_SIZE, p2.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+        }
+
+        // Initial Draw
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Game Loop (slower than 60fps for classic feel)
+        setInterval(update, 1000/30); // 30 FPS
+
+    </script>
+</body>
+</html>

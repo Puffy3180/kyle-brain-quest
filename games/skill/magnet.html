@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Magnet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #2d3436; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        canvas { display: block; }
+        #ui {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+        }
+        h1 { font-size: 2rem; margin: 0; }
+        p { font-size: 1.2rem; }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../../index.html'">← Back</button>
+
+    <div id="ui">
+        <h1>MAGNET</h1>
+        <p>CLICK to Switch Polarity (Red/Blue).<br>Match walls to stick/climb.</p>
+        <p id="score">Level: 1</p>
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+
+        let width, height;
+        // Player: x, y, radius, color, vy
+        let player = { x: 50, y: 200, r: 15, color: 'red', vy: 0, grounded: false };
+        let platforms = [];
+        let cameraX = 0;
+        let gameSpeed = 2;
+        let level = 1;
+        let isGameOver = false;
+
+        const RED = '#ff7675';
+        const BLUE = '#74b9ff';
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+
+        // Input
+        window.addEventListener('mousedown', switchPolarity);
+        window.addEventListener('keydown', e => {
+            if(e.code === 'Space') switchPolarity();
+            if(e.code === 'ArrowUp' || e.code === 'KeyW') jump();
+            if(isGameOver && e.code === 'Enter') resetGame();
+        });
+
+        function switchPolarity() {
+            if(isGameOver) return;
+            player.color = player.color === 'red' ? 'blue' : 'red';
+        }
+
+        function jump() {
+            if(isGameOver) return;
+            if(player.grounded) {
+                // Jump towards the opposite of the surface? 
+                // If on floor (y > height/2), jump up (negative vy)
+                // If on ceiling (y < height/2), jump down (positive vy)
+                // Actually, gravity is always down in this simple version? 
+                // Wait, "Match walls to stick/climb".
+                // In update():
+                // if(!onGround) player.vy += 0.5; (Gravity is down)
+                
+                // So we are always falling down.
+                // "Sticking" to ceiling means we set vy=0 and snap.
+                // So jumping from ceiling means letting go (gravity takes over) or pushing down?
+                // Jumping from floor means pushing up.
+                
+                // Let's assume "Jump" means "Move away from surface".
+                if(player.y > height/2) {
+                    // Floor
+                    player.vy = -12;
+                } else {
+                    // Ceiling
+                    player.vy = 5; // Push down
+                }
+                player.grounded = false;
+            }
+        }
+
+        function initGame() {
+            player.x = 100;
+            player.y = height/2;
+            player.vy = 0;
+            player.color = 'red';
+            cameraX = 0;
+            gameSpeed = 3;
+            level = 1;
+            platforms = [];
+            generateLevel();
+            isGameOver = false;
+            loop();
+        }
+
+        function generateLevel() {
+            let x = 0;
+            // Floor/Ceiling layout
+            for(let i=0; i<100; i++) {
+                const w = 200 + Math.random() * 300;
+                const gap = 50 + Math.random() * 100;
+                const color = Math.random() > 0.5 ? 'red' : 'blue';
+                
+                // Top or Bottom platform?
+                const isTop = Math.random() > 0.5;
+                
+                platforms.push({
+                    x: x,
+                    y: isTop ? 50 : height - 50,
+                    w: w,
+                    h: 20,
+                    color: color === 'red' ? RED : BLUE,
+                    type: color
+                });
+                x += w + gap;
+            }
+        }
+
+        function update() {
+            if(isGameOver) return;
+
+            player.x += gameSpeed;
+            cameraX = player.x - 100;
+
+            // Gravity
+            player.vy += 0.5;
+            player.y += player.vy;
+
+            // Collision
+            // We only stick if colors match
+            // If colors mismatch, we repel (bounce)? Or just pass through?
+            // "Match walls to stick/climb" implies safety.
+            
+            let onGround = false;
+
+            for(let p of platforms) {
+                // Check Rect Collision with some tolerance
+                if(player.x + player.r > p.x && player.x - player.r < p.x + p.w &&
+                   player.y + player.r > p.y && player.y - player.r < p.y + p.h) {
+                    
+                    if(player.color === p.type) {
+                        // Magnetic Grip!
+                        player.vy = 0;
+                        // Snap to surface
+                        if(p.y > height/2) {
+                             player.y = p.y - player.r; // Floor
+                             onGround = true;
+                        } else {
+                             player.y = p.y + p.h + player.r; // Ceiling
+                             onGround = true;
+                        }
+                    } else {
+                        isGameOver = true;
+                    }
+                }
+            }
+
+            // Gravity only if not on ground
+            if(!onGround) {
+                player.vy += 0.5;
+                player.y += player.vy;
+            }
+            if(player.y > height + 100 || player.y < -100) {
+                isGameOver = true;
+            }
+            
+            gameSpeed += 0.002; // Faster acceleration
+            scoreEl.innerText = "Distance: " + Math.floor(player.x/100);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#2d3436';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Platforms
+            for(let p of platforms) {
+                // Optimization: render only visible
+                if(p.x + p.w < cameraX || p.x > cameraX + width) continue;
+                
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.shadowBlur = 0;
+            }
+
+            // Player
+            ctx.fillStyle = player.color === 'red' ? RED : BLUE;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Visual Aura
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.restore();
+
+            if(isGameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.fillRect(0,0,width,height);
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.font = '40px Space Grotesk';
+                ctx.fillText("POLARITY LOST", width/2, height/2);
+                ctx.font = '20px Space Grotesk';
+                ctx.fillText("Press Enter to Restart", width/2, height/2 + 40);
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        function loop() {
+            update();
+            draw();
+        }
+
+        resize();
+        initGame();
+
+    </script>
+</body>
+</html>
