@@ -4,9 +4,18 @@
     style.innerHTML = `
         #troll-network-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 10000;
+            background: rgba(0,0,0,0.5); z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-family: 'Courier New', monospace; color: #0f0;
+            backdrop-filter: blur(5px);
+        }
+        .tn-modal {
+            background: rgba(0, 20, 0, 0.9);
+            border: 2px solid #0f0;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            text-align: center;
+            border-radius: 10px;
         }
         #troll-network-feed {
             position: fixed; bottom: 10px; right: 10px; width: 300px; height: 150px;
@@ -61,10 +70,13 @@
         const overlay = document.createElement('div');
         overlay.id = 'troll-network-overlay';
         overlay.innerHTML = `
-            <h1>ACCESS RESTRICTED</h1>
-            <p>IDENTIFICATION REQUIRED</p>
-            <input type="text" class="tn-input" placeholder="ENTER ALIAS" maxlength="15">
-            <button class="tn-btn">CONNECT</button>
+            <div class="tn-modal">
+                <h1 style="margin-top:0;">ACCESS RESTRICTED</h1>
+                <p>IDENTIFICATION REQUIRED</p>
+                <input type="text" class="tn-input" placeholder="ENTER ALIAS" maxlength="15">
+                <br>
+                <button class="tn-btn">CONNECT</button>
+            </div>
         `;
         document.body.appendChild(overlay);
 
