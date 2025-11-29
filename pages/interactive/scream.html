@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scream Therapy</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: black;
+            color: white;
+            font-family: 'Impact', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            user-select: none;
+        }
+        h1 { font-size: 50px; }
+        .circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff0000, #990000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 0 20px #ff0000;
+        }
+        .circle:active {
+            transform: scale(0.9);
+        }
+        #text {
+            margin-top: 30px;
+            font-size: 100px;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <h1>SCREAM THERAPY</h1>
+    <p>Click and hold to scream into the void</p>
+    
+    <div class="circle" onmousedown="scream()" onmouseup="stop()" onmouseleave="stop()">
+        HOLD
+    </div>
+    
+    <div id="text">AAAAAAAAAAAAAAAAAAAAAA</div>
+    
+    <a href="../../index.html" style="position: fixed; bottom: 20px; color: #666;">I feel better</a>
+
+    <script>
+        const text = document.getElementById('text');
+        const body = document.body;
+        let interval;
+
+        function scream() {
+            text.style.opacity = 1;
+            body.style.background = '#330000';
+            
+            interval = setInterval(() => {
+                // Shake screen
+                body.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+                
+                // Add random As
+                if (text.textContent.length < 50) {
+                    text.textContent += "A";
+                } else {
+                    text.textContent = "A";
+                }
+            }, 50);
+        }
+
+        function stop() {
+            clearInterval(interval);
+            text.style.opacity = 0;
+            body.style.background = 'black';
+            body.style.transform = 'none';
+        }
+    </script>
+</body>
+</html>
+

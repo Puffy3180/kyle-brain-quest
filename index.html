@@ -1,159 +1,352 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Trollverse</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Trollverse - The Worst Best Website</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>Trollverse</h1>
-            <p>A collection of digital frustrations and anomalies.</p>
+    <!-- Abstract Background Elements -->
+    <div class="visual-element circle-1"></div>
+    <div class="visual-element circle-2"></div>
+    <div class="visual-element grid-overlay"></div>
+
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="glitch-text" data-text="TROLLVERSE">TROLLVERSE</h1>
+            <p class="hero-sub">Award-Winningly Frustrating Digital Experiments.</p>
+            <a href="#collections" class="cta-button">Enter the Madness <i class="ri-arrow-down-line"></i></a>
         </div>
     </div>
 
-    <div class="container">
-        <div class="section-title">Interactive Tools</div>
-        <div class="link-group">
-            <a href="pages/interactive/mind-reader.html" class="card">
-                <div class="card-title">Mind Reader</div>
-                <div class="card-desc">I know what you're thinking</div>
+    <div class="features-section">
+        <div class="feature-box">
+            <i class="ri-spam-3-line feature-icon"></i>
+            <h3>100% Useless</h3>
+            <p>Every tool has been scientifically engineered to waste your time efficiently.</p>
+        </div>
+        <div class="feature-box">
+            <i class="ri-bar-chart-grouped-line feature-icon"></i>
+            <h3>Productivity Killer</h3>
+            <p>Guaranteed to lower your efficiency by at least 400%.</p>
+        </div>
+        <div class="feature-box">
+            <i class="ri-code-s-slash-line feature-icon"></i>
+            <h3>AI-Free Chaos</h3>
+            <p>Hand-coded anomalies that no machine would be stupid enough to write.</p>
+        </div>
+    </div>
+    
+    <div class="container" id="collections">
+        <div class="section-header">
+            <h2>The Collection</h2>
+            <p>Explore the archives of annoyance.</p>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Hero / Featured -->
+            <a href="pages/interactive/mind-reader.html" class="card span-2 span-row-2 featured">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-brain-line"></i></div>
+                    <div class="card-title">Mind Reader</div>
+                    <div class="card-desc">I know exactly what you are thinking right now.</div>
+                </div>
             </a>
-            <a href="pages/interactive/password.html" class="card">
-                <div class="card-title">Password Check</div>
-                <div class="card-desc">Is your security secure?</div>
-            </a>
-            <a href="pages/interactive/love.html" class="card">
-                <div class="card-title">Love Calculator</div>
-                <div class="card-desc">Scientifically accurate</div>
-            </a>
-            <a href="pages/interactive/iq.html" class="card">
-                <div class="card-title">IQ Test</div>
-                <div class="card-desc">Measure your brilliance</div>
-            </a>
-            <a href="pages/interactive/captcha.html" class="card">
-                <div class="card-title">Captcha</div>
-                <div class="card-desc">Are you a robot?</div>
-            </a>
-            <a href="pages/interactive/ugly.html" class="card">
-                <div class="card-title">Ugly Meter</div>
-                <div class="card-desc">Face analysis AI</div>
-            </a>
-            <a href="pages/interactive/volume.html" class="card">
-                <div class="card-title">Volume Control</div>
-                <div class="card-desc">Precise audio adjustment</div>
-            </a>
-            <a href="pages/interactive/typing.html" class="card">
-                <div class="card-title">Typing Test</div>
-                <div class="card-desc">Test your WPM</div>
-            </a>
-            <a href="pages/interactive/date.html" class="card">
-                <div class="card-title">Date Picker</div>
-                <div class="card-desc">Select your birth date</div>
-            </a>
-            <a href="pages/interactive/phone.html" class="card">
-                <div class="card-title">Phone Input</div>
-                <div class="card-desc">Enter your number</div>
-            </a>
-            <a href="pages/interactive/calculator.html" class="card">
-                <div class="card-title">Calculator</div>
-                <div class="card-desc">Solves math problems</div>
-            </a>
-            <a href="pages/interactive/age.html" class="card">
-                <div class="card-title">Age Check</div>
-                <div class="card-desc">Verify your age</div>
-            </a>
-            <a href="pages/interactive/reaction.html" class="card">
-                <div class="card-title">Reaction Time</div>
-                <div class="card-desc">Test your reflexes</div>
-            </a>
-            <a href="pages/interactive/battery.html" class="card">
-                <div class="card-title">Battery Charger</div>
-                <div class="card-desc">Manual charging</div>
-            </a>
-            <a href="pages/interactive/map.html" class="card">
-                <div class="card-title">Find House</div>
-                <div class="card-desc">Locate your home</div>
-            </a>
-            <a href="pages/interactive/color.html" class="card">
-                <div class="card-title">Color Test</div>
-                <div class="card-desc">Identify the color</div>
-            </a>
-            <a href="pages/interactive/lottery.html" class="card">
-                <div class="card-title">Lottery</div>
-                <div class="card-desc">Scratch & Win</div>
-            </a>
-            <a href="pages/interactive/spam.html" class="card">
-                <div class="card-title">You Won</div>
-                <div class="card-desc">Claim your prize</div>
-            </a>
-            <a href="pages/interactive/fortune.html" class="card">
-                <div class="card-title">Fortune Cookie</div>
-                <div class="card-desc">Predict your future</div>
-            </a>
-            <a href="pages/interactive/unsubscribe.html" class="card">
-                <div class="card-title">Unsubscribe</div>
-                <div class="card-desc">Leave our list</div>
-            </a>
-            <a href="pages/interactive/terms.html" class="card">
-                <div class="card-title">Terms of Service</div>
-                <div class="card-desc">Please read carefully</div>
-            </a>
+
             <a href="pages/interactive/unclickable.html" class="card">
-                <div class="card-title">Free Money</div>
-                <div class="card-desc">Click to claim</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-money-dollar-circle-line"></i></div>
+                    <div class="card-title">Free Money</div>
+                    <div class="card-desc">Catch me if you can</div>
+                </div>
             </a>
-        </div>
 
-        <div class="section-title">Visual Simulations</div>
-        <div class="link-group">
-            <a href="pages/visual/loading.html" class="card">
-                <div class="card-title">Ultimate Surprise</div>
-                <div class="card-desc">Loading...</div>
-            </a>
             <a href="pages/visual/virus.html" class="card">
-                <div class="card-title">System Update</div>
-                <div class="card-desc">Important patch</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-virus-line"></i></div>
+                    <div class="card-title">System Update</div>
+                    <div class="card-desc">Important patch</div>
+                </div>
             </a>
+
+            <!-- Standard Items -->
+            <a href="pages/interactive/password.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-lock-password-line"></i></div>
+                    <div class="card-title">Password</div>
+                    <div class="card-desc">Security check</div>
+                </div>
+            </a>
+            
+            <a href="pages/interactive/love.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-heart-pulse-line"></i></div>
+                    <div class="card-title">Love Calc</div>
+                    <div class="card-desc">100% Accurate</div>
+                </div>
+            </a>
+
+            <a href="pages/visual/infinity.html" class="card span-2">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-infinite-loop-line"></i></div>
+                    <div class="card-title">The Answer</div>
+                    <div class="card-desc">Scroll to find the meaning of life</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/iq.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-lightbulb-flash-line"></i></div>
+                    <div class="card-title">IQ Test</div>
+                    <div class="card-desc">Measure brain</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/captcha.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-robot-line"></i></div>
+                    <div class="card-title">Captcha</div>
+                    <div class="card-desc">Not a robot?</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/scream.html" class="card span-2">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-emotion-unhappy-line"></i></div>
+                    <div class="card-title">Scream Therapy</div>
+                    <div class="card-desc">Release your anger</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/ugly.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-ghost-line"></i></div>
+                    <div class="card-title">Ugly Meter</div>
+                    <div class="card-desc">Face AI</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/volume.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-volume-up-line"></i></div>
+                    <div class="card-title">Volume</div>
+                    <div class="card-desc">Precise control</div>
+                </div>
+            </a>
+
+            <a href="pages/visual/loading.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-loader-2-line"></i></div>
+                    <div class="card-title">Surprise</div>
+                    <div class="card-desc">Loading...</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/teleport.html" class="card span-row-2">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-magic-line"></i></div>
+                    <div class="card-title">Teleport</div>
+                    <div class="card-desc">Go anywhere</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/typing.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-keyboard-line"></i></div>
+                    <div class="card-title">Typing</div>
+                    <div class="card-desc">Speed test</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/date.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-calendar-line"></i></div>
+                    <div class="card-title">Date</div>
+                    <div class="card-desc">Pick birth</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/phone.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-smartphone-line"></i></div>
+                    <div class="card-title">Phone</div>
+                    <div class="card-desc">Input digits</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/calculator.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-calculator-line"></i></div>
+                    <div class="card-title">Calc</div>
+                    <div class="card-desc">Do math</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/age.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-user-3-line"></i></div>
+                    <div class="card-title">Age</div>
+                    <div class="card-desc">Verify</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/reaction.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-timer-flash-line"></i></div>
+                    <div class="card-title">Reflex</div>
+                    <div class="card-desc">Test speed</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/battery.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-battery-charge-line"></i></div>
+                    <div class="card-title">Battery</div>
+                    <div class="card-desc">Charge</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/map.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-map-pin-line"></i></div>
+                    <div class="card-title">Map</div>
+                    <div class="card-desc">Find house</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/color.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-palette-line"></i></div>
+                    <div class="card-title">Color</div>
+                    <div class="card-desc">Identify</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/lottery.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-coupon-3-line"></i></div>
+                    <div class="card-title">Lotto</div>
+                    <div class="card-desc">Win big</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/spam.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-gift-line"></i></div>
+                    <div class="card-title">Winner</div>
+                    <div class="card-desc">Prize</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/fortune.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-moon-line"></i></div>
+                    <div class="card-title">Fortune</div>
+                    <div class="card-desc">Predict</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/unsubscribe.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-mail-close-line"></i></div>
+                    <div class="card-title">Unsub</div>
+                    <div class="card-desc">Leave</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/terms.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-file-list-3-line"></i></div>
+                    <div class="card-title">ToS</div>
+                    <div class="card-desc">Read me</div>
+                </div>
+            </a>
+
             <a href="pages/visual/gravity.html" class="card">
-                <div class="card-title">Gravity</div>
-                <div class="card-desc">Physics engine</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-earth-line"></i></div>
+                    <div class="card-title">Gravity</div>
+                    <div class="card-desc">Physics</div>
+                </div>
             </a>
+
             <a href="pages/visual/dvd.html" class="card">
-                <div class="card-title">DVD</div>
-                <div class="card-desc">Bouncing logo</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-disc-line"></i></div>
+                    <div class="card-title">DVD</div>
+                    <div class="card-desc">Bounce</div>
+                </div>
             </a>
-            <a href="pages/visual/infinity.html" class="card">
-                <div class="card-title">The Answer</div>
-                <div class="card-desc">Scroll to find out</div>
-            </a>
+
             <a href="pages/visual/dialup.html" class="card">
-                <div class="card-title">Slow Internet</div>
-                <div class="card-desc">Experience the 90s</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-router-line"></i></div>
+                    <div class="card-title">Dialup</div>
+                    <div class="card-desc">Slow</div>
+                </div>
             </a>
+
             <a href="pages/visual/chat.html" class="card">
-                <div class="card-title">Chat Support</div>
-                <div class="card-desc">Talk to an agent</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-chat-smile-2-line"></i></div>
+                    <div class="card-title">Chat</div>
+                    <div class="card-desc">Support</div>
+                </div>
             </a>
+
             <a href="pages/visual/ram.html" class="card">
-                <div class="card-title">Download RAM</div>
-                <div class="card-desc">Boost performance</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-download-cloud-2-line"></i></div>
+                    <div class="card-title">RAM</div>
+                    <div class="card-desc">Download</div>
+                </div>
             </a>
+
             <a href="pages/visual/pixel.html" class="card">
-                <div class="card-title">Dead Pixel</div>
-                <div class="card-desc">Screen diagnostic</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
+                    <div class="card-title">Pixel</div>
+                    <div class="card-desc">Dead</div>
+                </div>
             </a>
+
             <a href="pages/visual/mirror.html" class="card">
-                <div class="card-title">Mirror</div>
-                <div class="card-desc">Reflect yourself</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-layout-row-line"></i></div>
+                    <div class="card-title">Mirror</div>
+                    <div class="card-desc">Reflect</div>
+                </div>
             </a>
+
             <a href="pages/visual/horse.html" class="card">
-                <div class="card-title">Spinning Horse</div>
-                <div class="card-desc">Rotational equine</div>
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-riding-line"></i></div>
+                    <div class="card-title">Horse</div>
+                    <div class="card-desc">Spin</div>
+                </div>
+            </a>
+
+            <a href="pages/interactive/bored.html" class="card span-2">
+                <div class="card-content">
+                    <div class="card-icon"><i class="ri-zzz-line"></i></div>
+                    <div class="card-title">I Am Bored</div>
+                    <div class="card-desc">Entertainment for the desperate</div>
+                </div>
             </a>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <p>© 2025 Trollverse Inc. All rights reserved (not really).</p>
+        <div class="footer-links">
+            <a href="#" onclick="alert('Legal action pending')">Legal</a>
+            <a href="#" onclick="alert('We do not care')">Privacy</a>
+            <a href="#" onclick="alert('Email sent to trash')">Contact</a>
+        </div>
+    </footer>
 
     <script src="assets/js/troll-network.js"></script>
 </body>

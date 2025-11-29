@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Destination Unknown</title>
+    <style>
+        body {
+            background: #2c3e50;
+            color: #ecf0f1;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 10px #c0392b;
+            transition: all 0.1s;
+        }
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Where will you go?</h1>
+    <button onclick="teleport()">TELEPORT ME</button>
+    
+    <a href="../../index.html" style="margin-top: 50px; color: #95a5a6;">Stay here</a>
+
+    <script>
+        function teleport() {
+            const pages = [
+                'mind-reader.html', 'password.html', 'love.html', 'iq.html', 'captcha.html',
+                'ugly.html', 'volume.html', 'typing.html', 'date.html', 'phone.html',
+                'calculator.html', 'age.html', 'reaction.html', 'battery.html', 'map.html',
+                'color.html', 'lottery.html', 'spam.html', 'fortune.html', 'unsubscribe.html',
+                'terms.html', 'unclickable.html', '../../pages/visual/loading.html', 
+                '../../pages/visual/virus.html', '../../pages/visual/gravity.html', 
+                '../../pages/visual/dvd.html', '../../pages/visual/infinity.html',
+                '../../pages/visual/dialup.html', '../../pages/visual/chat.html', 
+                '../../pages/visual/ram.html', '../../pages/visual/pixel.html',
+                '../../pages/visual/mirror.html', '../../pages/visual/horse.html',
+                'bored.html', 'scream.html'
+            ];
+            
+            const randomPage = pages[Math.floor(Math.random() * pages.length)];
+            window.location.href = randomPage;
+        }
+    </script>
+</body>
+</html>
+
