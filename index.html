@@ -2,21 +2,45 @@
 <html>
 <head>
     <title>Mind Reader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             text-align: center;
             margin-top: 50px;
-            font-size: 24px;
-            font-family: sans-serif;
+            font-size: 18px;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f9fc;
+            color: #2d3436;
         }
         input {
-            font-size: 20px;
-            padding: 10px;
+            font-size: 18px;
+            padding: 12px 20px;
             margin: 20px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
         }
         button {
-            font-size: 20px;
-            padding: 10px 20px;
+            font-size: 18px;
+            padding: 12px 30px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(108, 92, 231, 0.2);
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.3);
+            background-color: #5b4cc4;
         }
         #progressContainer {
             margin-top: 30px;
@@ -28,14 +52,17 @@
         }
         #progressBar {
             width: 400px;
-            height: 30px;
-            background-color: #f0f0f0;
+            height: 10px;
+            background-color: #dfe6e9;
             margin: 0 auto;
-            border: 1px solid #ccc;
+            border: none;
+            border-radius: 5px;
+            overflow: hidden;
         }        #progress {
             height: 100%;
-            background-color: #4CAF50;
+            background-color: #6c5ce7;
             width: 0%;
+            border-radius: 5px;
         }        .explosion {
             position: fixed;
             top: 50%;
@@ -97,34 +124,175 @@
             90% { transform: translateX(-2px) translateY(-1px); }
         }
         nav {
-            background: #f0f0f0;
-            padding: 20px;
-            margin-bottom: 40px;
-            border-bottom: 1px solid #ccc;
+            background: white;
+            padding: 30px;
+            margin-bottom: 50px;
+            border-bottom: none;
             text-align: left;
-            max-width: 800px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
-            border-radius: 10px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        h3 { margin-top: 0; margin-bottom: 10px; font-size: 18px; color: #555; border-bottom: 1px solid #ddd; padding-bottom: 5px;}
-        .link-group { margin-bottom: 20px; }
+        h3 { 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            font-size: 14px; 
+            color: #b2bec3; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            border-bottom: 1px solid #f1f2f6; 
+            padding-bottom: 10px;
+        }
+        .link-group { margin-bottom: 30px; }
         nav a { 
             margin: 5px; 
             text-decoration: none; 
-            color: #333; 
-            font-weight: bold; 
+            color: #fff; 
+            font-weight: 500; 
             display: inline-block; 
-            padding: 5px 10px;
-            background: white;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 16px;
+            padding: 8px 16px;
+            background: #b2bec3;
+            border-radius: 50px;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        
+        /* Custom Themes per Button */
+        /* Free Money: Gold/Green */
+        a[href*="unclickable"] { background: #f1c40f; color: #fff; }
+        a[href*="unclickable"]:hover { background: #f39c12; }
+
+        /* Ultimate Surprise: Blue Spinner */
+        a[href*="loading"] { background: #3498db; color: #fff; }
+        a[href*="loading"]:hover { background: #2980b9; }
+
+        /* System Update: Red Alert */
+        a[href*="virus"] { background: #e74c3c; color: #fff; }
+        a[href*="virus"]:hover { background: #c0392b; }
+
+        /* Gravity: Purple Space */
+        a[href*="gravity"] { background: #9b59b6; color: #fff; }
+        a[href*="gravity"]:hover { background: #8e44ad; }
+
+        /* DVD: Black Retro */
+        a[href*="dvd"] { background: #2d3436; color: #fff; }
+        a[href*="dvd"]:hover { background: #000; }
+
+        /* The Answer: Deep Blue Abyss */
+        a[href*="infinity"] { background: #0984e3; color: #fff; }
+        a[href*="infinity"]:hover { background: #74b9ff; }
+
+        /* Password: Lock Green */
+        a[href*="password"] { background: #2ecc71; color: #fff; }
+        a[href*="password"]:hover { background: #27ae60; }
+
+        /* Love: Pink */
+        a[href*="love"] { background: #ff7675; color: #fff; }
+        a[href*="love"]:hover { background: #d63031; }
+
+        /* IQ: Smart Blue */
+        a[href*="iq"] { background: #74b9ff; color: #fff; }
+        a[href*="iq"]:hover { background: #0984e3; }
+
+        /* Captcha: Confusing Grey */
+        a[href*="captcha"] { background: #636e72; color: #fff; }
+        a[href*="captcha"]:hover { background: #2d3436; }
+
+        /* Slow Internet: Old Beige */
+        a[href*="dialup"] { background: #fab1a0; color: #fff; }
+        a[href*="dialup"]:hover { background: #e17055; }
+
+        /* Ugly Meter: Biohazard Green */
+        a[href*="ugly"] { background: #00b894; color: #fff; }
+        a[href*="ugly"]:hover { background: #55efc4; }
+
+        /* Chat: Friendly Blue */
+        a[href*="chat"] { background: #00cec9; color: #fff; }
+        a[href*="chat"]:hover { background: #81ecec; }
+
+        /* RAM: Tech Green */
+        a[href*="ram"] { background: #009432; color: #fff; }
+        a[href*="ram"]:hover { background: #006266; }
+
+        /* Volume: Loud Orange */
+        a[href*="volume"] { background: #fdcb6e; color: #fff; }
+        a[href*="volume"]:hover { background: #ffeaa7; }
+
+        /* Typing: Keyboard Grey */
+        a[href*="typing"] { background: #b2bec3; color: #fff; }
+        a[href*="typing"]:hover { background: #636e72; }
+
+        /* Date: Calendar Red */
+        a[href*="date"] { background: #ff7675; color: #fff; }
+        a[href*="date"]:hover { background: #fab1a0; }
+
+        /* Phone: Dial Green */
+        a[href*="phone"] { background: #55efc4; color: #fff; }
+        a[href*="phone"]:hover { background: #00b894; }
+
+        /* Calculator: Math Orange */
+        a[href*="calculator"] { background: #e17055; color: #fff; }
+        a[href*="calculator"]:hover { background: #d63031; }
+
+        /* Age: Warning Yellow */
+        a[href*="age"] { background: #fdcb6e; color: #fff; }
+        a[href*="age"]:hover { background: #e1b12c; }
+
+        /* Reaction: Fast Red */
+        a[href*="reaction"] { background: #d63031; color: #fff; }
+        a[href*="reaction"]:hover { background: #c0392b; }
+
+        /* Battery: Energy Yellow */
+        a[href*="battery"] { background: #f1c40f; color: #fff; }
+        a[href*="battery"]:hover { background: #f39c12; }
+
+        /* Map: Ocean Blue */
+        a[href*="map"] { background: #74b9ff; color: #fff; }
+        a[href*="map"]:hover { background: #0984e3; }
+
+        /* Color: Rainbow (Gradient) */
+        a[href*="color"] { background: linear-gradient(45deg, #ff7675, #74b9ff); color: #fff; }
+        a[href*="color"]:hover { background: linear-gradient(45deg, #d63031, #0984e3); }
+
+        /* Lottery: Gold */
+        a[href*="lottery"] { background: #f1c40f; color: #fff; border: 1px solid #e67e22; }
+        a[href*="lottery"]:hover { background: #f39c12; }
+
+        /* Spam: Alert Red */
+        a[href*="spam"] { background: #ff0000; color: #fff; }
+        a[href*="spam"]:hover { background: #cc0000; }
+
+        /* Fortune: Cookie Brown */
+        a[href*="fortune"] { background: #cd6133; color: #fff; }
+        a[href*="fortune"]:hover { background: #a6512b; }
+
+        /* Unsubscribe: Danger Red */
+        a[href*="unsubscribe"] { background: #2d3436; color: #fff; }
+        a[href*="unsubscribe"]:hover { background: #636e72; }
+
+        /* ToS: Boring Grey */
+        a[href*="terms"] { background: #b2bec3; color: #fff; }
+        a[href*="terms"]:hover { background: #dfe6e9; color: #636e72; }
+
+        /* Pixel: Glitch Black */
+        a[href*="pixel"] { background: #000; color: #0f0; font-family: monospace; }
+        a[href*="pixel"]:hover { background: #2d3436; }
+
+        /* Mirror: Silver */
+        a[href*="mirror"] { background: #dfe6e9; color: #636e72; }
+        a[href*="mirror"]:hover { background: #b2bec3; color: #fff; }
+
+        /* Horse: Brown */
+        a[href*="horse"] { background: #8d6e63; color: #fff; }
+        a[href*="horse"]:hover { background: #6d4c41; }
+
         nav a:hover { 
             color: white; 
-            background: #ff4444; 
-            border-color: #ff4444;
+            transform: translateY(-2px);
         }
     </style>
 </head>

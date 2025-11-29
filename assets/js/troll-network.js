@@ -4,48 +4,58 @@
     style.innerHTML = `
         #troll-network-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 10000;
+            background: rgba(255,255,255,0.8); z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: 'Courier New', monospace; color: #0f0;
-            backdrop-filter: blur(5px);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #333;
+            backdrop-filter: blur(10px);
         }
         .tn-modal {
-            background: rgba(0, 20, 0, 0.9);
-            border: 2px solid #0f0;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: white;
+            border: none;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             text-align: center;
-            border-radius: 10px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
         }
         #troll-network-feed {
-            position: fixed; bottom: 10px; right: 10px; width: 300px; height: 150px;
-            background: rgba(0,0,0,0.8); border: 1px solid #0f0;
-            color: #0f0; font-family: monospace; font-size: 12px;
+            position: fixed; bottom: 20px; right: 20px; width: 320px; height: auto; max-height: 200px;
+            background: rgba(255,255,255,0.9); border: none;
+            color: #333; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px;
             z-index: 9999; overflow: hidden; display: flex; flex-direction: column;
             pointer-events: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         .feed-header {
-            background: #0f0; color: black; padding: 2px 5px; font-weight: bold;
-            display: flex; justify-content: space-between;
+            background: #fff; color: #888; padding: 10px 15px; font-weight: 600; font-size: 11px; letter-spacing: 1px;
+            display: flex; justify-content: space-between; border-bottom: 1px solid #eee;
+            text-transform: uppercase;
         }
         .feed-content {
-            padding: 5px; overflow-y: hidden; flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 10px 15px; overflow-y: hidden; flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
         }
         .feed-item {
-            margin-bottom: 2px; opacity: 0; animation: fadeIn 0.3s forwards;
+            margin-bottom: 6px; opacity: 0; animation: fadeIn 0.3s forwards;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: #444;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
+        .feed-item b { color: #000; font-weight: 600; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .tn-input {
-            background: black; border: 2px solid #0f0; color: #0f0; padding: 10px;
-            font-size: 20px; font-family: monospace; outline: none; text-align: center;
-            margin-bottom: 20px;
+            background: #f5f7fa; border: 2px solid transparent; color: #333; padding: 15px;
+            font-size: 16px; font-family: inherit; outline: none; text-align: center;
+            margin-bottom: 20px; border-radius: 12px; width: 100%; box-sizing: border-box;
+            transition: all 0.2s;
         }
+        .tn-input:focus { background: white; border-color: #6c5ce7; box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1); }
         .tn-btn {
-            background: #0f0; color: black; border: none; padding: 10px 30px;
-            font-size: 18px; font-weight: bold; cursor: pointer; font-family: monospace;
+            background: #6c5ce7; color: white; border: none; padding: 12px 25px;
+            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+            border-radius: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
         }
-        .tn-btn:hover { background: white; }
+        .tn-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4); }
     `;
     document.head.appendChild(style);
 
@@ -66,34 +76,51 @@
     ];
 
     // 3. Login Overlay
-    if (!username && !window.location.pathname.includes('login.html')) {
+    // Only show if no username is saved
+    if (!username) {
         const overlay = document.createElement('div');
         overlay.id = 'troll-network-overlay';
         overlay.innerHTML = `
             <div class="tn-modal">
-                <h1 style="margin-top:0;">ACCESS RESTRICTED</h1>
-                <p>IDENTIFICATION REQUIRED</p>
-                <input type="text" class="tn-input" placeholder="ENTER ALIAS" maxlength="15">
+                <h1 style="margin-top:0; font-size: 24px; margin-bottom: 10px;">Access Trollverse</h1>
+                <p style="color:#666; margin-bottom: 25px; font-size: 14px;">Please identify yourself to proceed.</p>
+                <input type="text" class="tn-input" placeholder="Enter Username" maxlength="15">
                 <br>
-                <button class="tn-btn">CONNECT</button>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button class="tn-btn" id="tn-login">Connect</button>
+                    <button class="tn-btn" id="tn-guest" style="background:#e0e0e0; color:#555; box-shadow:none;">Guest</button>
+                </div>
             </div>
         `;
         document.body.appendChild(overlay);
 
         const input = overlay.querySelector('input');
-        const btn = overlay.querySelector('button');
+        const btnLogin = overlay.querySelector('#tn-login');
+        const btnGuest = overlay.querySelector('#tn-guest');
 
-        const login = () => {
-            if (input.value.trim()) {
-                username = input.value.trim();
+        const setSession = (name) => {
+            username = name;
+            try {
                 localStorage.setItem('trollUsername', username);
-                overlay.remove();
-                initFeed();
-                broadcast(`${username} has joined the chaos`);
+            } catch(e) {
+                console.error("Storage failed", e);
             }
+            overlay.remove();
+            initFeed();
+            broadcast(`${username} has joined the chaos`);
         };
 
-        btn.onclick = login;
+        const login = () => {
+            const val = input.value.trim();
+            if (val) setSession(val);
+        };
+
+        const guest = () => {
+            setSession("Anonymous");
+        };
+
+        btnLogin.onclick = login;
+        btnGuest.onclick = guest;
         input.onkeypress = (e) => { if(e.key === 'Enter') login(); };
     } else {
         initFeed();
@@ -129,7 +156,7 @@
         if (!feedContent) return;
         const div = document.createElement('div');
         div.className = 'feed-item';
-        div.innerHTML = `<span style="color: #00ff00">&gt;</span> <b>${user}</b> ${action}`;
+        div.innerHTML = `<span style="color: #6c5ce7; font-weight:bold;">●</span> <b>${user}</b> ${action}`;
         feedContent.appendChild(div);
         
         if (feedContent.children.length > 6) {
