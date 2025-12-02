@@ -1,0 +1,27 @@
+Bd = braindead
+Id = ideas
+
+Enhanced Click:
+- unlock at 10bd
++1 to bd production
+Initial Cost: 10 bd
+Cost creep: 1.5
+
+Autoclicker:
+Unlocks at 50 bd
++bd production/second
+Initial Cost: 100 bd
+Cost creep: 2?
+
+Thought Condenser:
+Unlocks at 10 bd?
++0.1 to id/s
+Initial Cost: 50 bd
+Cost creep: 1.5?
+
+Idea Amplifier:
+Unlock at 1 ideas?
++? to id/s
+Initial Cost: 100 bd
+Cost creep: 1.5?
+
