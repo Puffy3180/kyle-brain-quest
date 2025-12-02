@@ -1,746 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>smiles's website</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Bangers&family=Creepster&family=Monoton&family=Orbitron:wght@400;700&family=Permanent+Marker&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script>
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyle's Brainquest</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Abstract Background Elements -->
-    <div class="visual-element circle-1"></div>
-    <div class="visual-element circle-2"></div>
-    <div class="visual-element grid-overlay"></div>
-
-    <!-- Top Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="glitch-logo" data-text="TROLLVERSE">TROLLVERSE</span>
-        </div>
-        <div class="nav-menu">
-            <button class="nav-btn" onclick="randomInteractive()">
-                <i class="ri-gamepad-line"></i> Random Tool
-            </button>
-            <button class="nav-btn" onclick="randomVisual()">
-                <i class="ri-eye-line"></i> Random Visual
-            </button>
-            <button class="nav-btn special" onclick="randomAll()">
-                <i class="ri-shuffle-line"></i> I'm Feeling Lucky
-            </button>
-        </div>
-    </nav>
-
-    <div class="container" id="collections">
-        <div class="bento-grid">
-            <!-- Hero / Featured -->
-            <a href="games/mind/mind-reader.html" class="card span-2 span-row-2 featured" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-brain-line"></i></div>
-                    <div class="card-title">Mind Reader</div>
-                    <div class="card-desc">I know exactly what you are thinking right now.</div>
+    <div class="container">
+        <!-- Sidebar: Resources -->
+        <div class="sidebar" id="sidebar-section">
+            <div class="header">
+                <h1>KYLE'S<br>BRAINQUEST</h1>
+            </div>
+            <div class="resource-display">
+                <div class="section-title">Resources</div>
+                <div class="resource-item">
+                    <div class="resource-name">Braindead</div>
+                    <div class="resource-value" id="res-braindead">0</div>
                 </div>
-            </a>
-
-            <a href="games/troll/unclickable.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-money-dollar-circle-line"></i></div>
-                    <div class="card-title">Free Money</div>
-                    <div class="card-desc">Catch me if you can</div>
+                <div class="resource-item">
+                    <div class="resource-name">Ideas</div>
+                    <div class="resource-value" id="res-ideas">0.0</div>
                 </div>
-            </a>
-
-            <a href="games/visual/virus.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-virus-line"></i></div>
-                    <div class="card-title">System Update</div>
-                    <div class="card-desc">Important patch</div>
+                <div class="resource-item" id="immunity-display" style="display: none;">
+                    <div class="resource-name">Immunity</div>
+                    <div class="resource-value" id="res-immunity">100</div>
                 </div>
-            </a>
-
-            <!-- Standard Items -->
-            <a href="games/mind/password.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-lock-password-line"></i></div>
-                    <div class="card-title">Password</div>
-                    <div class="card-desc">Security check</div>
-                </div>
-            </a>
+            </div>
             
-            <a href="games/troll/love.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-heart-pulse-line"></i></div>
-                    <div class="card-title">Love Calc</div>
-                    <div class="card-desc">100% Accurate</div>
-                </div>
-            </a>
-
-            <a href="games/mind/iq.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-lightbulb-flash-line"></i></div>
-                    <div class="card-title">IQ Test</div>
-                    <div class="card-desc">Measure brain</div>
-                </div>
-            </a>
-
-            <a href="games/troll/captcha.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-robot-line"></i></div>
-                    <div class="card-title">Captcha</div>
-                    <div class="card-desc">Not a robot?</div>
-                </div>
-            </a>
-
-            <a href="games/troll/scream.html" class="card span-2" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-emotion-unhappy-line"></i></div>
-                    <div class="card-title">Scream Therapy</div>
-                    <div class="card-desc">Release your anger</div>
-                </div>
-            </a>
-
-            <a href="games/troll/ugly.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-ghost-line"></i></div>
-                    <div class="card-title">Ugly Meter</div>
-                    <div class="card-desc">Face AI</div>
-                </div>
-            </a>
-
-            <a href="games/troll/volume.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-volume-up-line"></i></div>
-                    <div class="card-title">Volume</div>
-                    <div class="card-desc">Precise control</div>
-                </div>
-            </a>
-
-            <a href="games/troll/teleport.html" class="card span-row-2" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-magic-line"></i></div>
-                    <div class="card-title">Teleport</div>
-                    <div class="card-desc">Go anywhere</div>
-                </div>
-            </a>
-
-            <a href="games/troll/date.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-calendar-line"></i></div>
-                    <div class="card-title">Date</div>
-                    <div class="card-desc">Pick birth</div>
-                </div>
-            </a>
-
-            <a href="games/troll/phone.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-smartphone-line"></i></div>
-                    <div class="card-title">Phone</div>
-                    <div class="card-desc">Input digits</div>
-                </div>
-            </a>
-
-            <a href="games/mind/calculator.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-calculator-line"></i></div>
-                    <div class="card-title">Calc</div>
-                    <div class="card-desc">Do math</div>
-                </div>
-            </a>
-
-            <a href="games/troll/age.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-user-3-line"></i></div>
-                    <div class="card-title">Age</div>
-                    <div class="card-desc">Verify</div>
-                </div>
-            </a>
-
-            <a href="games/troll/battery.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-battery-charge-line"></i></div>
-                    <div class="card-title">Battery</div>
-                    <div class="card-desc">Charge</div>
-                </div>
-            </a>
-
-            <a href="games/troll/map.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-map-pin-line"></i></div>
-                    <div class="card-title">Map</div>
-                    <div class="card-desc">Find house</div>
-                </div>
-            </a>
-
-            <a href="games/mind/color.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-palette-line"></i></div>
-                    <div class="card-title">Color</div>
-                    <div class="card-desc">Identify</div>
-                </div>
-            </a>
-
-            <a href="games/troll/lottery.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-coupon-3-line"></i></div>
-                    <div class="card-title">Lotto</div>
-                    <div class="card-desc">Win big</div>
-                </div>
-            </a>
-
-            <a href="games/troll/spam.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-gift-line"></i></div>
-                    <div class="card-title">Winner</div>
-                    <div class="card-desc">Prize</div>
-                </div>
-            </a>
-
-            <a href="games/troll/fortune.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-moon-line"></i></div>
-                    <div class="card-title">Fortune</div>
-                    <div class="card-desc">Predict</div>
-                </div>
-            </a>
-
-            <a href="games/troll/unsubscribe.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-mail-close-line"></i></div>
-                    <div class="card-title">Unsub</div>
-                    <div class="card-desc">Leave</div>
-                </div>
-            </a>
-
-            <a href="games/troll/terms.html" class="card" data-category="troll">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-file-list-3-line"></i></div>
-                    <div class="card-title">ToS</div>
-                    <div class="card-desc">Read me</div>
-                </div>
-            </a>
-
-            <a href="games/visual/clean.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-brush-line"></i></div>
-                    <div class="card-title">Clean</div>
-                </div>
-            </a>
-
-            <a href="games/visual/bored.html" class="card span-2" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-zzz-line"></i></div>
-                    <div class="card-title">I Am Bored</div>
-                </div>
-            </a>
-
-            <a href="games/visual/gravity.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-earth-line"></i></div>
-                    <div class="card-title">Gravity</div>
-                </div>
-            </a>
-
-            <a href="games/visual/infinity.html" class="card span-2" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-infinite-loop-line"></i></div>
-                    <div class="card-title">The Answer</div>
-                </div>
-            </a>
-
-            <a href="games/visual/dvd.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-disc-line"></i></div>
-                    <div class="card-title">DVD</div>
-                </div>
-            </a>
-
-            <a href="games/visual/loading.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-loader-2-line"></i></div>
-                    <div class="card-title">Surprise</div>
-                </div>
-            </a>
-
-            <a href="games/visual/dialup.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-router-line"></i></div>
-                    <div class="card-title">Dialup</div>
-                </div>
-            </a>
-
-            <a href="games/visual/chat.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-chat-smile-2-line"></i></div>
-                    <div class="card-title">Chat</div>
-                </div>
-            </a>
-
-            <a href="games/visual/ram.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-download-cloud-2-line"></i></div>
-                    <div class="card-title">RAM</div>
-                </div>
-            </a>
-
-            <a href="games/visual/pixel.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
-                    <div class="card-title">Pixel</div>
-                </div>
-            </a>
-
-            <a href="games/visual/mirror.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-layout-row-line"></i></div>
-                    <div class="card-title">Mirror</div>
-                </div>
-            </a>
-
-            <a href="games/visual/horse.html" class="card" data-category="visual">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-riding-line"></i></div>
-                    <div class="card-title">Horse</div>
-                </div>
-            </a>
+            <button id="settings-button" class="settings-btn">SETTINGS</button>
         </div>
 
-        <!-- Arcade Section -->
-        <div class="section-header" style="display: block; margin-top: 80px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; margin-bottom: 60px;">
-            <h2>Arcade</h2>
-            <p style="color: var(--text-muted); font-size: 1.5rem;">Games. Some classic. Some... different.</p>
-        </div>
-
-        <!-- Category Selection Cards -->
-        <div class="category-grid" style="margin-bottom: 40px;">
-            <div class="card" onclick="toggleSection('skill')" style="cursor: pointer; --glow-color: #ff0000;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-sword-line"></i></div>
-                    <div class="card-title">Survival & Skill</div>
-                    <div class="card-desc">Test your reflexes</div>
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>SETTINGS</h2>
+                    <button id="close-settings" class="close-btn">×</button>
                 </div>
-            </div>
-
-            <div class="card" onclick="toggleSection('classic')" style="cursor: pointer; --glow-color: #00b894;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-gamepad-line"></i></div>
-                    <div class="card-title">Classics</div>
-                    <div class="card-desc">Retro arcade games</div>
+                
+                <div class="modal-section">
+                    <h3>OPTIONS</h3>
+                    <div class="setting-row">
+                        <span>Offline Progress</span>
+                        <label class="switch">
+                            <input type="checkbox" id="offline-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div class="card" onclick="toggleSection('multiplayer')" style="cursor: pointer; --glow-color: #e056fd;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-group-line"></i></div>
-                    <div class="card-title">2 Player</div>
-                    <div class="card-desc">Local Multiplayer</div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggleSection('strategy')" style="cursor: pointer; --glow-color: #f1c40f;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-chess-line"></i></div>
-                    <div class="card-title">Strategy</div>
-                    <div class="card-desc">Think to win</div>
+                <div class="modal-section">
+                    <h3>SAVE MANAGEMENT</h3>
+                    <div class="save-controls">
+                        <button id="export-save-btn" class="action-btn">Export Save</button>
+                        <button id="import-save-btn" class="action-btn">Import Save</button>
+                    </div>
+                    <textarea id="save-data-area" readonly placeholder="Save data will appear here..."></textarea>
+                    <button id="hard-reset-btn" class="danger-btn">HARD RESET GAME</button>
                 </div>
             </div>
         </div>
 
-        <!-- Strategy Games Section -->
-        <div id="section-strategy" class="bento-grid game-section" style="display: none;">
-             <a href="games/strategy/defense.html" class="card" data-category="strategy" style="border: 2px solid #e17055;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-shield-cross-line"></i></div>
-                    <div class="card-title">Core Defense</div>
+        <!-- Flash Overlay -->
+        <div id="flash-overlay"></div>
+
+        <!-- Main Content: Brainharvest -->
+        <div class="main-content">
+            <div class="brain-container" id="brain-section">
+                <button id="brain-button" class="brain-btn">
+                    <div class="brain-icon">🧠</div>
+                    <div class="brain-glow"></div>
+                    <div class="brain-particles"></div>
+                </button>
+            </div>
+
+            <div class="panels-container" id="panels-section">
+                <!-- Upgrades Panel -->
+                <div class="panel upgrades-panel">
+                    <h2>UPGRADES</h2>
+                    <div class="upgrade-list" id="upgrade-list">
+                        <!-- Upgrades injected by JS -->
+                    </div>
                 </div>
-            </a>
-             <a href="games/strategy/virus.html" class="card" data-category="strategy" style="border: 2px solid #00b894;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-virus-fill"></i></div>
-                    <div class="card-title">Virus Wars</div>
+
+                <!-- Research Panel -->
+                <div class="panel research-panel">
+                    <h2>RESEARCH</h2>
+                    <div class="upgrade-list" id="research-list">
+                         <!-- Research injected by JS -->
+                    </div>
                 </div>
-            </a>
-             <a href="games/strategy/chain.html" class="card" data-category="strategy" style="border: 2px solid #6c5ce7;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-links-line"></i></div>
-                    <div class="card-title">Chain Reaction</div>
-                </div>
-            </a>
-             <a href="games/strategy/mines.html" class="card" data-category="strategy" style="border: 2px solid #fdcb6e;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-grid-fill"></i></div>
-                    <div class="card-title">Neon Mines</div>
-                </div>
-            </a>
+            </div>
         </div>
 
-        <!-- Skill Games Section -->
-        <div id="section-skill" class="bento-grid game-section" style="display: none;">
-            <a href="games/skill/shadow.html" class="card" data-category="skill" style="background: #000; border: 2px solid #fff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-ghost-2-line"></i></div>
-                    <div class="card-title">Shadow Leap</div>
+        <!-- Log Panel -->
+        <div class="log-panel" id="log-section">
+            <div class="log-header">
+                <h2>NEURAL LOG</h2>
+                <div class="log-tabs">
+                    <button class="log-tab active">All</button>
+                    <button class="log-tab">Resources</button>
+                    <button class="log-tab">Lore</button>
                 </div>
-            </a>
-
-            <a href="games/skill/frequency.html" class="card" data-category="skill" style="border: 2px solid #0f0;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-pulse-line"></i></div>
-                    <div class="card-title">Frequency</div>
-                </div>
-            </a>
-
-            <a href="games/skill/survival.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-focus-2-line"></i></div>
-                    <div class="card-title">Survival</div>
-                </div>
-            </a>
-
-            <a href="games/skill/prey.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-snake-line"></i></div>
-                    <div class="card-title">Prey</div>
-                </div>
-            </a>
-
-            <a href="games/skill/orbit.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-planet-line"></i></div>
-                    <div class="card-title">Orbit</div>
-                </div>
-            </a>
-
-            <a href="games/skill/echo.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-radar-line"></i></div>
-                    <div class="card-title">Echo</div>
-                </div>
-            </a>
-            
-            <a href="games/arcade/shift.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-arrow-up-down-line"></i></div>
-                    <div class="card-title">Shift</div>
-                </div>
-            </a>
-
-            <a href="games/skill/polka.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-focus-3-line"></i></div>
-                    <div class="card-title">Polka Dot</div>
-                </div>
-            </a>
-
-            <a href="games/skill/fill.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-bubble-chart-line"></i></div>
-                    <div class="card-title">Fill The Void</div>
-                </div>
-            </a>
-
-            <a href="games/skill/typing.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-keyboard-line"></i></div>
-                    <div class="card-title">Typing</div>
-                </div>
-            </a>
-
-            <a href="games/skill/reaction.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-timer-flash-line"></i></div>
-                    <div class="card-title">Reflex</div>
-                </div>
-            </a>
-
-            <a href="games/skill/draw.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-pencil-ruler-2-line"></i></div>
-                    <div class="card-title">Gravity Brush</div>
-                </div>
-            </a>
-
-            <a href="games/skill/fit.html" class="card" data-category="skill">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-shape-line"></i></div>
-                    <div class="card-title">Shape Shift</div>
-                </div>
-            </a>
-
-            <a href="games/skill/time.html" class="card" data-category="skill" style="background: #fff; color: #000; border: 2px solid #000;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-time-line"></i></div>
-                    <div class="card-title">Time Shift</div>
-                </div>
-            </a>
-
-            <a href="games/skill/magnet.html" class="card" data-category="skill" style="background: #2d3436; border-left: 5px solid #ff7675; border-right: 5px solid #74b9ff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-magnet-line"></i></div>
-                    <div class="card-title">Magnet</div>
-                </div>
-            </a>
-
-            <a href="games/mind/split.html" class="card" data-category="mind" style="background: linear-gradient(90deg, #0984e3 50%, #d63031 50%); color: #fff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-split-cells-horizontal"></i></div>
-                    <div class="card-title">Split Brain</div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Multiplayer Section -->
-        <div id="section-multiplayer" class="bento-grid game-section" style="display: none;">
-            <a href="games/multiplayer/pong.html" class="card" data-category="multiplayer" style="border: 2px solid #ff00ff; box-shadow: 0 0 10px #ff00ff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-ping-pong-line"></i></div>
-                    <div class="card-title">Neon Pong</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/tanks.html" class="card" data-category="multiplayer" style="border: 2px solid #00ff00; background: #111;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-car-line"></i></div>
-                    <div class="card-title">Cyber Tanks</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/tron.html" class="card" data-category="multiplayer" style="border: 2px solid #00ffff; box-shadow: 0 0 15px #00ffff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-bike-line"></i></div>
-                    <div class="card-title">Tron Trails</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/tug.html" class="card" data-category="multiplayer" style="border-left: 5px solid #ff0000; border-right: 5px solid #0000ff;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-drag-drop-line"></i></div>
-                    <div class="card-title">Tug of War</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/sumo.html" class="card" data-category="multiplayer" style="border: 2px solid #ff9f43; border-radius: 50% 50% 10px 10px;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-checkbox-blank-circle-line"></i></div>
-                    <div class="card-title">Sumo Smash</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/shooter.html" class="card" data-category="multiplayer" style="border: 2px solid #ff9ff3;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-crosshair-2-line"></i></div>
-                    <div class="card-title">Space Duel</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/tag.html" class="card" data-category="multiplayer" style="border: 2px solid #feca57;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-run-line"></i></div>
-                    <div class="card-title">Pixel Tag</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/soccer.html" class="card" data-category="multiplayer" style="border: 2px solid #54a0ff; background: #2f3542;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-football-line"></i></div>
-                    <div class="card-title">Micro Soccer</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/race.html" class="card" data-category="multiplayer" style="border: 2px solid #5f27cd; background: linear-gradient(90deg, #5f27cd 50%, #a29bfe 50%);">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-flag-line"></i></div>
-                    <div class="card-title">Speed Run</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/rps.html" class="card" data-category="multiplayer" style="border: 2px solid #c8d6e5; color: #2d3436; background: #dfe6e9;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-scissors-line"></i></div>
-                    <div class="card-title">RPS Battle</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/jet.html" class="card" data-category="multiplayer" style="border: 2px solid #e55039; background: #0a3d62;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-plane-line"></i></div>
-                    <div class="card-title">Jet Fight</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/snake.html" class="card" data-category="multiplayer" style="border: 2px solid #00b894;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-snake-line"></i></div>
-                    <div class="card-title">Snake Battle</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/curve.html" class="card" data-category="multiplayer" style="border: 2px solid #2980b9;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-football-line"></i></div>
-                    <div class="card-title">Curve Ball</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/basket.html" class="card" data-category="multiplayer" style="border: 2px solid #f39c12;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-basketball-line"></i></div>
-                    <div class="card-title">Basket Battle</div>
-                </div>
-            </a>
-            <a href="games/multiplayer/ninja.html" class="card" data-category="multiplayer" style="border: 2px solid #636e72; background: #2d3436;">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-sword-fill"></i></div>
-                    <div class="card-title">Ninja Duel</div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Classic Games Section -->
-        <div id="section-classic" class="bento-grid game-section" style="display: none;">
-            <a href="games/arcade/snake.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-bug-line"></i></div>
-                    <div class="card-title">Snake</div>
-                </div>
-            </a>
-            <a href="games/arcade/pong.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-ping-pong-line"></i></div>
-                    <div class="card-title">Pong</div>
-                </div>
-            </a>
-            <a href="games/arcade/stack.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-stack-line"></i></div>
-                    <div class="card-title">Stacker</div>
-                </div>
-            </a>
-            <a href="games/mind/simon.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-lightbulb-line"></i></div>
-                    <div class="card-title">Simon</div>
-                </div>
-            </a>
-            <a href="games/arcade/flappy.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-flight-takeoff-line"></i></div>
-                    <div class="card-title">Flappy</div>
-                </div>
-            </a>
-            <a href="games/arcade/whack.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-hammer-line"></i></div>
-                    <div class="card-title">Whack</div>
-                </div>
-            </a>
-            <a href="games/arcade/maze.html" class="card" data-category="mind">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-drag-move-line"></i></div>
-                    <div class="card-title">Maze</div>
-                </div>
-            </a>
-            <a href="games/arcade/runner.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-run-line"></i></div>
-                    <div class="card-title">Dino</div>
-                </div>
-            </a>
-            <a href="games/arcade/space.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-rocket-line"></i></div>
-                    <div class="card-title">Space</div>
-                </div>
-            </a>
-            <a href="games/arcade/breakout.html" class="card" data-category="arcade">
-                <div class="card-content">
-                    <div class="card-icon"><i class="ri-layout-grid-line"></i></div>
-                    <div class="card-title">Breakout</div>
-                </div>
-            </a>
+            </div>
+            <div id="log-content" class="log-content">
+                <!-- Logs go here -->
+            </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <p>© 2025 Trollverse Inc. All rights reserved (not really).</p>
-        <div class="footer-links">
-            <a href="#" onclick="alert('Legal action pending')">Legal</a>
-            <a href="#" onclick="alert('We do not care')">Privacy</a>
-            <a href="#" onclick="alert('Email sent to trash')">Contact</a>
-        </div>
-    </footer>
-
-    <script src="assets/js/troll-network.js"></script>
-    <script>
-        // Scroll Position Handling
-        window.addEventListener('scroll', () => {
-            sessionStorage.setItem('scrollPos', window.scrollY);
-        });
-
-        window.addEventListener('load', () => {
-            const scrollPos = sessionStorage.getItem('scrollPos');
-            if (scrollPos) {
-                setTimeout(() => window.scrollTo(0, parseInt(scrollPos)), 0);
-            }
-        });
-
-        // Random Navigation Functions - UPDATED PATHS
-        const interactivePages = [
-            'games/mind/mind-reader.html', 'games/troll/unclickable.html',
-            'games/mind/password.html', 'games/troll/love.html',
-            'games/mind/iq.html', 'games/troll/captcha.html',
-            'games/troll/scream.html', 'games/troll/ugly.html',
-            'games/troll/volume.html', 'games/troll/teleport.html',
-            'games/skill/typing.html', 'games/troll/date.html',
-            'games/troll/phone.html', 'games/mind/calculator.html',
-            'games/troll/age.html', 'games/skill/reaction.html',
-            'games/troll/battery.html', 'games/troll/map.html',
-            'games/mind/color.html', 'games/troll/lottery.html',
-            'games/troll/spam.html', 'games/troll/fortune.html',
-            'games/troll/unsubscribe.html', 'games/troll/terms.html',
-            'games/visual/bored.html',
-            'games/skill/survival.html', 'games/skill/prey.html',
-            'games/visual/clean.html', 'games/skill/orbit.html',
-            'games/skill/echo.html',
-            'games/skill/shadow.html', 'games/skill/frequency.html'
-        ];
-
-        const visualPages = [
-            'games/visual/virus.html', 'games/visual/infinity.html',
-            'games/visual/loading.html', 'games/visual/gravity.html',
-            'games/visual/dvd.html', 'games/visual/dialup.html',
-            'games/visual/chat.html', 'games/visual/ram.html',
-            'games/visual/pixel.html', 'games/visual/mirror.html',
-            'games/visual/horse.html'
-        ];
-
-        function randomInteractive() {
-            const page = interactivePages[Math.floor(Math.random() * interactivePages.length)];
-            window.location.href = page;
-        }
-
-        function randomVisual() {
-            const page = visualPages[Math.floor(Math.random() * visualPages.length)];
-            window.location.href = page;
-        }
-
-        function randomAll() {
-            const allPages = [...interactivePages, ...visualPages];
-            const page = allPages[Math.floor(Math.random() * allPages.length)];
-            window.location.href = page;
-        }
-
-        function toggleSection(sectionName) {
-            const sections = ['skill', 'classic', 'multiplayer', 'strategy'];
-            
-            // Toggle the clicked section
-            const target = document.getElementById('section-' + sectionName);
-            const isHidden = target.style.display === 'none';
-            
-            // Hide all sections first
-            sections.forEach(s => {
-                document.getElementById('section-' + s).style.display = 'none';
-            });
-
-            // If it was hidden, show it. If it was shown, it's now hidden (toggle behavior).
-            // The user said "expands below".
-            if (isHidden) {
-                target.style.display = 'grid';
-            }
-        }
-    </script>
+    <script src="data.js"></script>
+    <script src="ui.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
