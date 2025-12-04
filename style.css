@@ -45,6 +45,19 @@ body {
     font-weight: bold;
 }
 
+.res-rate {
+    color: #aaaaaa;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+.res-capped {
+    color: #ff4444;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
 /* Main Area */
 .main-area {
     display: flex;
@@ -57,8 +70,38 @@ body {
 .visual-area {
     flex: 0 0 300px;
     display: flex;
+    flex-direction: column; /* Stack face and feedback */
     justify-content: center;
     align-items: center;
+}
+
+#brain-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 20px; /* Comfortable hit area */
+    border-radius: 10px; /* Optional: smooth corners if we ever add bg */
+    transition: background-color 0.2s;
+}
+
+#brain-wrapper:hover {
+    background-color: rgba(255, 255, 255, 0.02); /* Subtle hover hint */
+}
+
+#click-feedback {
+    min-height: 20px;
+    margin-top: 10px;
+    color: var(--dim-text);
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    user-select: none;
+}
+
+#click-feedback.visible {
+    opacity: 1;
+    transition: none;
 }
 
 #ascii-art {
@@ -67,26 +110,42 @@ body {
     line-height: 12px;
     white-space: pre;
     color: var(--dim-text);
-    cursor: pointer;
     user-select: none;
-    transition: color 0.2s;
+    transition: color 0.2s ease, transform 0.1s ease;
 }
 
-#ascii-art:hover {
-    color: var(--highlight);
+/* When clicking the wrapper, light up the brain */
+#brain-wrapper:active #ascii-art {
+    color: #ffffff !important;
+    transform: scale(0.95);
+    transition: none;
 }
 
-#ascii-art:active {
-    transform: scale(0.98);
-}
-
-/* Terminal Area (Log + Controls) */
-.terminal-area {
-    flex: 1;
+/* Controls Column (Center) */
+.controls-column {
+    flex: 0 0 300px; /* Fixed width for controls */
     display: flex;
     flex-direction: column;
-    gap: 20px;
     min-height: 0;
+    border-left: 1px solid var(--dim-text);
+    border-right: 1px solid var(--dim-text);
+    padding: 0 20px; /* Spacing inside column */
+}
+
+.controls-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto; /* Allow scrolling if too many buttons */
+}
+
+/* Log Column (Right) */
+.log-column {
+    flex: 1; /* Takes remaining space */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-left: 20px;
 }
 
 .log-display {
@@ -114,29 +173,21 @@ body {
     to { opacity: 1; }
 }
 
-.controls-area {
-    min-height: 150px;
-    border-top: 1px dashed var(--dim-text);
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 /* Text Buttons / Links */
 .cmd-btn {
     background: none;
-    border: none;
-    color: var(--accent);
+    border: 1px solid var(--dim-text);
+    color: var(--dim-text);
     font-family: var(--font-mono);
-    font-size: 1em;
+    padding: 10px 15px;
+    margin-bottom: 10px;
     cursor: pointer;
     text-align: left;
-    padding: 5px 10px; /* Added padding for hit area */
+    width: 100%;
+    transition: all 0.2s;
+    font-size: 1.1em;
     text-decoration: none;
-    width: fit-content;
     user-select: none; /* Prevent text selection */
-    transition: background-color 0.2s, color 0.2s;
     border-radius: 4px;
 }
 
@@ -191,3 +242,32 @@ body {
 ::-webkit-scrollbar-track { background: #111; }
 ::-webkit-scrollbar-thumb { background: #333; }
 ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Navigation Notifications */
+.nav-notify {
+    position: relative;
+}
+
+.nav-notify::after {
+    content: '!';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(255, 68, 68, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}

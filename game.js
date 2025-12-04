@@ -35,6 +35,7 @@ class Game {
         // Initialize from data.js
         this.upgrades = getInitialUpgrades();
         this.research = getInitialResearch();
+        this.vaccines = getInitialVaccines();
         this.jobs = getInitialJobs();
         this.currentJob = 'intern';
         this.jobCooldown = 0;
@@ -50,7 +51,8 @@ class Game {
         this.logs = [];
         this.currentLogFilter = 'all';
         this.options = {
-            offlineProgress: true
+            offlineProgress: true,
+            brightness: 100
         };
 
         // Initialize UI Manager
@@ -70,13 +72,13 @@ class Game {
             this.ui.hideAll(); // Ensure hidden first
             this.load();
             this.isReady = true;
-            this.gameLoop();
+            this.tick();
         } else {
             // New Game: Hide UI and play intro
             this.ui.hideAll();
             this.ui.playIntroSequence(() => {
                 this.isReady = true;
-                this.gameLoop();
+                this.tick();
                 this.log("System online.", "lore");
             });
         }
@@ -110,6 +112,11 @@ class Game {
                 id: r.id,
                 purchased: r.purchased,
                 visible: r.visible
+            })),
+            vaccines: Object.values(this.vaccines).map(v => ({
+                id: v.id,
+                purchased: v.purchased,
+                visible: v.visible
             })),
             options: this.options,
             lastTick: Date.now(),
@@ -181,6 +188,16 @@ class Game {
                 });
             }
 
+            if (saveData.vaccines) {
+                saveData.vaccines.forEach(savedVaccine => {
+                    const vaccine = this.vaccines[savedVaccine.id];
+                    if (vaccine) {
+                        vaccine.purchased = savedVaccine.purchased;
+                        if (savedVaccine.visible !== undefined) vaccine.visible = savedVaccine.visible;
+                    }
+                });
+            }
+
             if (saveData.logHistory) {
                 this.logs = saveData.logHistory;
                 // Restore logs to UI without animation/sound if possible, or just add them
@@ -197,17 +214,34 @@ class Game {
                     const maxOfflineSeconds = 7200;
                     const effectiveSeconds = Math.min(secondsOffline, maxOfflineSeconds);
                     
-                    const immunityMult = 100 / this.resources.immunity;
-                    const bdGained = (this.production.braindead * immunityMult) * effectiveSeconds;
-                    const ideasGained = this.production.ideas * effectiveSeconds;
+                    const immunityMult = 100 / Math.max(1, this.resources.immunity);
+                    const caps = this.calculateCaps();
+
+                    // Calculate potential gains
+                    const potentialBd = (this.production.braindead * immunityMult) * effectiveSeconds;
+                    const potentialIdeas = this.production.ideas * effectiveSeconds;
                     
-                    if (bdGained > 0 || ideasGained > 0) {
-                        this.resources.braindead += bdGained;
-                        this.resources.ideas += ideasGained;
+                    // Calculate actual gains by clamping to caps
+                    const currentBd = this.resources.braindead;
+                    const currentIdeas = this.resources.ideas;
+                    
+                    const newBd = Math.min(currentBd + potentialBd, caps.braindead);
+                    // For ideas, we only care about hard cap for offline? Or soft cap penalty?
+                    // Let's just respect hard cap for now to be safe and simple.
+                    // If we want to be perfect we'd integrate the soft cap penalty but that's complex math for offline.
+                    // Let's just cap at hard cap.
+                    const newIdeas = Math.min(currentIdeas + potentialIdeas, caps.ideas.hard);
+                    
+                    const actualBdGained = newBd - currentBd;
+                    const actualIdeasGained = newIdeas - currentIdeas;
+                    
+                    if (actualBdGained > 0 || actualIdeasGained > 0) {
+                        this.resources.braindead = newBd;
+                        this.resources.ideas = newIdeas;
                         
                         let msg = `You were gone for ${Math.floor(secondsOffline)}s.`;
                         if (secondsOffline > maxOfflineSeconds) msg += ` (Capped at 2h)`;
-                        msg += ` Gained ${Math.floor(bdGained)} Bd and ${ideasGained.toFixed(1)} Ideas.`;
+                        msg += ` Gained ${Math.floor(actualBdGained)} Bd and ${actualIdeasGained.toFixed(1)} Ideas.`;
                         
                         this.log(msg, "general");
                     }
@@ -237,10 +271,14 @@ class Game {
             const offlineToggle = document.getElementById('offline-toggle');
             if (offlineToggle) offlineToggle.checked = this.options.offlineProgress;
 
+            // Apply visual settings
+            if (this.options.brightness) {
+                this.ui.applyBrightness(this.options.brightness);
+            }
+
         } catch (e) {
             console.error("Failed to load save:", e);
             if (!isInitialLoad) alert("Invalid save data!");
-            this.log("Error loading save data.", "general");
         }
     }
 
@@ -301,6 +339,20 @@ class Game {
             item.purchased = true;
             item.effect(this); // Pass game instance
             this.log(`Researched ${item.name}`, "unlock");
+            this.updateUI();
+        }
+    }
+
+    buyVaccine(key) {
+        const item = this.vaccines[key];
+        if (!item.purchased && this.resources[item.currency] >= item.cost) {
+            // Check prereqs
+            if (item.prereq && !this.vaccines[item.prereq].purchased) return;
+
+            this.resources[item.currency] -= item.cost;
+            item.purchased = true;
+            item.effect(this); // Pass game instance
+            this.log(`Administered ${item.name}`, "unlock");
             this.updateUI();
         }
     }
@@ -423,9 +475,10 @@ class Game {
             this.resources.currency = 0;
             this.resources.suspicion = 0;
             
-            // Reset Upgrades & Research
+            // Reset Upgrades & Research & Vaccines
              Object.values(this.upgrades).forEach(u => { u.count = 0; });
              Object.values(this.research).forEach(r => { r.purchased = false; r.visible = false; });
+             Object.values(this.vaccines).forEach(v => { v.purchased = false; v.visible = false; });
 
             // Apply global multiplier
             this.productionMultipliers.braindead *= 2.5; // Total 2.5x? Or additional? Text says "2.5x multiplier(total)"
@@ -437,39 +490,59 @@ class Game {
         }
     }
 
-    gameLoop() {
+    checkUnlocks() {
+        // Helper to check a collection
+        const check = (collection) => {
+            Object.values(collection).forEach(item => {
+                if (!item.visible && item.unlockCondition && item.unlockCondition(this)) {
+                    item.visible = true;
+                    item.newlyUnlocked = true;
+                    this.log(`${item.name} unlocked!`, "unlock");
+                }
+            });
+        };
+
+        check(this.upgrades);
+        check(this.research);
+        check(this.vaccines);
+    }
+
+    tick() {
         const now = Date.now();
         const dt = (now - this.lastTick) / 1000;
-        
-        if (dt >= 0.1) {
-            const immunityMult = 100 / this.resources.immunity;
-            
-            // Calculate Caps
-            const caps = this.calculateCaps();
-            
-            // Braindead Production
-            this.resources.braindead += (this.production.braindead * this.productionMultipliers.braindead * immunityMult) * dt;
-            
-            // Ideas Production with Soft Cap Logic
-            let ideasProduction = this.production.ideas * this.productionMultipliers.ideas * dt;
-            if (this.resources.ideas > caps.ideas.soft) {
-                this.resources.ideas += ideasProduction / Math.pow(this.scalingMulti,(this.resources.ideas-caps.ideas.soft)); // Penalty if above soft cap
-            }
-            else {
-                this.resources.ideas += ideasProduction;
-            }
-            
-            this.checkCaps();
-            
-            if (this.jobCooldown > 0) {
-                this.jobCooldown -= dt;
-            }
+        this.lastTick = now;
 
-            this.lastTick = now;
-            this.updateUI();
+        const immunityMult = 100 / Math.max(1, this.resources.immunity);
+        const caps = this.calculateCaps();
+        
+        // Braindead Production
+        this.resources.braindead += (this.production.braindead * this.productionMultipliers.braindead * immunityMult) * dt;
+        
+        // Ideas Production with Soft Cap Logic
+        let ideasProduction = this.production.ideas * this.productionMultipliers.ideas * dt;
+        if (this.resources.ideas > caps.ideas.soft) {
+            this.resources.ideas += ideasProduction / Math.pow(this.scalingMulti,(this.resources.ideas-caps.ideas.soft)); // Penalty if above soft cap
+        }
+        else {
+            this.resources.ideas += ideasProduction;
+        }
+        
+        this.checkCaps();
+        
+        if (this.jobCooldown > 0) {
+            this.jobCooldown -= dt;
         }
 
-        requestAnimationFrame(() => this.gameLoop());
+        this.checkUnlocks();
+        this.updateUI();
+        
+        // Autosave every 30s
+        if (now - this.lastSave > 30000) {
+            this.save();
+            this.lastSave = now;
+        }
+        
+        requestAnimationFrame(() => this.tick());
     }
 
     updateUI() {

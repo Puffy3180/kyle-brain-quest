@@ -160,22 +160,7 @@ function getInitialResearch() {
             effect: function(game) {
                 game.log("Aha! I can just create a vaccine to decrease my immunity. That's how vaccines work right?", "lore");
             },
-            unlockCondition: function(game) { return game.research.thinkMore.purchased && game.resources.ideas >= 5; },
-            visible: false
-        },
-        vaccineV1: {
-            id: 'vaccineV1',
-            name: "Vaccine V1",
-            description: "Reduces immunity.",
-            cost: 25,
-            currency: "ideas",
-            purchased: false,
-            prereq: 'immunityResearch',
-            effect: function(game) {
-                game.resources.immunity = Math.max(1, game.resources.immunity - 10);
-                game.log("Immunity reduced! Braindead gain increased.", "general");
-            },
-            unlockCondition: function(game) { return game.research.immunityResearch.purchased && game.resources.ideas >= 10; },
+            unlockCondition: function(game) { return game.research.immunityResearch.purchased && game.resources.ideas >= 5; },
             visible: false
         },
         necroticTissue: {
@@ -238,18 +223,6 @@ function getInitialResearch() {
             unlockCondition: function(game) { return game.research.necroticShell.purchased; },
             visible: false
         },
-        vaccineV2: {
-            id: 'vaccineV2',
-            name: "Vaccine V2",
-            description: "Resets everything except milestones.",
-            cost: 50,
-            currency: "ideas",
-            purchased: false,
-            prereq: 'vaccineV1',
-            effect: function(game) { game.triggerVaccine(2); },
-            unlockCondition: function(game) { return game.research.vaccineV1.purchased; },
-            visible: false
-        },
         getAJob: {
             id: 'getAJob',
             name: "Get a J*b",
@@ -257,12 +230,12 @@ function getInitialResearch() {
             cost: 50,
             currency: "ideas",
             purchased: false,
-            prereq: 'vaccineV1',
+            prereq: null,
             effect: function(game) { 
                 game.log("Time to work...", "lore");
                 document.getElementById('job-panel').style.display = 'flex';
             },
-            unlockCondition: function(game) { return game.research.vaccineV1.purchased; },
+            unlockCondition: function(game) { return game.vaccines && game.vaccines.vaccineV1 && game.vaccines.vaccineV1.purchased; },
             visible: false
         },
         studyBiomatter: {
@@ -287,6 +260,38 @@ function getInitialResearch() {
             prereq: 'studyBiomatter',
             effect: function(game) { game.log("Lab operational.", "lore"); },
             unlockCondition: function(game) { return game.research.studyBiomatter.purchased; },
+            visible: false
+        }
+    };
+}
+
+function getInitialVaccines() {
+    return {
+        vaccineV1: {
+            id: 'vaccineV1',
+            name: "Vaccine V1",
+            description: "Reduces immunity.",
+            cost: 52345234234523452345,
+            currency: "ideas",
+            purchased: false,
+            prereq: null,
+            effect: function(game) {
+                game.resources.immunity = Math.max(1, game.resources.immunity - 10);
+                game.log("Immunity reduced! Braindead gain increased.", "general");
+            },
+            unlockCondition: function(game) { return game.research.immunityResearch.purchased && game.resources.ideas >= 10; },
+            visible: false
+        },
+        vaccineV2: {
+            id: 'vaccineV2',
+            name: "Vaccine V2",
+            description: "Resets everything except milestones.",
+            cost: 50,
+            currency: "ideas",
+            purchased: false,
+            prereq: 'vaccineV1',
+            effect: function(game) { game.triggerVaccine(2); },
+            unlockCondition: function(game) { return game.vaccines.vaccineV1.purchased; },
             visible: false
         }
     };

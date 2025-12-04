@@ -28,10 +28,43 @@ class TerminalUI {
 
     init() {
         this.elements.asciiArt.textContent = ""; // Start empty
-        this.elements.asciiArt.onclick = () => this.game.clickBrain();
+        this.elements.clickFeedback = document.getElementById('click-feedback');
+        this.elements.brainWrapper = document.getElementById('brain-wrapper');
+        
+        // Click handler on the wrapper for better usability
+        this.elements.brainWrapper.onclick = () => {
+            this.game.clickBrain();
+            
+            // Show feedback
+            const immunityMult = 100 / Math.max(1, this.game.resources.immunity);
+            const gain = this.game.clickValue.braindead * immunityMult;
+            const caps = this.game.calculateCaps();
+            
+            const fb = this.elements.clickFeedback;
+            
+            if (this.game.resources.braindead >= caps.braindead) {
+                fb.textContent = `+0 (MAX)`;
+                fb.style.color = '#ff4444';
+            } else {
+                fb.textContent = `+${Math.floor(gain)} Bd`;
+                fb.style.color = ''; // Reset color
+            }
+            
+            fb.classList.remove('visible');
+            void fb.offsetWidth; // Trigger reflow
+            fb.classList.add('visible');
+            
+            if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
+            
+            this.feedbackTimeout = setTimeout(() => {
+                fb.classList.remove('visible');
+            }, 100); // Start fading out quickly
+        };
         
         // Prevent double-click selection
-        this.elements.asciiArt.addEventListener('mousedown', (e) => e.preventDefault());
+        this.elements.brainWrapper.addEventListener('mousedown', (e) => e.preventDefault());
+        
+        this.feedbackTimeout = null;
     }
 
     update(game) {
@@ -71,10 +104,34 @@ class TerminalUI {
         if (this.elements.resourceStrip.style.display === 'none') return;
 
         const res = game.resources;
+        const caps = game.calculateCaps();
         let html = '';
         
-        if (res.braindead > 0) html += `<div class="res-item">Braindead: <span class="res-val">${Math.floor(res.braindead)}</span></div>`;
-        if (res.ideas > 0) html += `<div class="res-item">Ideas: <span class="res-val">${res.ideas.toFixed(1)}</span></div>`;
+        // Calculate rates
+        const immunityMult = 100 / Math.max(1, res.immunity);
+        const bdRate = game.production.braindead * game.productionMultipliers.braindead * immunityMult;
+        const ideasRate = game.production.ideas * game.productionMultipliers.ideas;
+
+        if (res.braindead > 0) {
+            html += `<div class="res-item">Braindead: <span class="res-val">${Math.floor(res.braindead)}</span>`;
+            if (res.braindead >= caps.braindead) {
+                html += `<span class="res-capped">(MAX)</span>`;
+            } else if (bdRate > 0) {
+                html += `<span class="res-rate">(+${bdRate.toFixed(1)}/s)</span>`;
+            }
+            html += `</div>`;
+        }
+        
+        if (res.ideas > 0) {
+            html += `<div class="res-item">Ideas: <span class="res-val">${res.ideas.toFixed(1)}</span>`;
+            if (res.ideas >= caps.ideas.hard) {
+                html += `<span class="res-capped">(MAX)</span>`;
+            } else if (ideasRate > 0) {
+                html += `<span class="res-rate">(+${ideasRate.toFixed(1)}/s)</span>`;
+            }
+            html += `</div>`;
+        }
+
         if (res.immunity < 100) html += `<div class="res-item">Immunity: <span class="res-val">${Math.floor(res.immunity)}</span></div>`;
         if (res.currency > 0) html += `<div class="res-item">Currency: <span class="res-val">${Math.floor(res.currency)}</span></div>`;
 
@@ -84,18 +141,42 @@ class TerminalUI {
         }
     }
 
+    hasNotifications(view, game) {
+        if (view === 'upgrades') {
+            return Object.values(game.upgrades).some(u => u.newlyUnlocked);
+        }
+        if (view === 'research') {
+            return Object.values(game.research).some(r => r.newlyUnlocked);
+        }
+        if (view === 'vaccines') {
+            return Object.values(game.vaccines).some(v => v.newlyUnlocked);
+        }
+        return false;
+    }
+
     updateNav(game) {
         if (this.elements.navStrip.style.display === 'none') return;
 
         const views = ['main'];
         if (game.resources.braindead >= 10) views.push('upgrades');
         if (game.resources.ideas > 0) views.push('research');
-        if (game.research.getAJob && game.research.getAJob.purchased) views.push('jobs');
-
-        let html = '';
+        if (game.research.immunityResearch.purchased) {
+            views.push('vaccines');
+        }
+        
+        if (game.research.getAJob && game.research.getAJob.purchased) {
+            views.push('jobs');
+        } let html = '';
         views.forEach(view => {
             const active = this.currentView === view ? 'active' : '';
-            html += `<a href="#" class="nav-link ${active}" onclick="game.ui.switchView('${view}'); return false;">[ ${view.toUpperCase()} ]</a>`;
+            let notify = '';
+
+            // Check for notifications
+            if (this.hasNotifications(view, game)) {
+                notify = 'nav-notify';
+            }
+
+            html += `<a href="#" class="nav-link ${active} ${notify}" onclick="game.ui.switchView('${view}'); return false;">[ ${view.toUpperCase()} ]</a>`;
         });
         
         // Settings link always there if nav is visible
@@ -110,6 +191,16 @@ class TerminalUI {
 
     switchView(view) {
         this.currentView = view;
+        
+        // Clear notifications for this view
+        if (view === 'upgrades') {
+            Object.values(this.game.upgrades).forEach(u => u.newlyUnlocked = false);
+        } else if (view === 'research') {
+            Object.values(this.game.research).forEach(r => r.newlyUnlocked = false);
+        } else if (view === 'vaccines') {
+            Object.values(this.game.vaccines).forEach(v => v.newlyUnlocked = false);
+        }
+        
         this.update(this.game); // Immediate update
     }
 
@@ -123,6 +214,8 @@ class TerminalUI {
             html = this.getUpgradesHTML(game);
         } else if (this.currentView === 'research') {
             html = this.getResearchHTML(game);
+        } else if (this.currentView === 'vaccines') {
+            html = this.getVaccinesHTML(game);
         } else if (this.currentView === 'jobs') {
             html = this.getJobsHTML(game);
         } else if (this.currentView === 'settings') {
@@ -138,13 +231,12 @@ class TerminalUI {
     getUpgradesHTML(game) {
         let html = '';
         Object.values(game.upgrades).forEach(u => {
-            if (!u.visible && u.unlockCondition && u.unlockCondition(game)) u.visible = true;
-            if (!u.visible && u.count === 0) return;
+            if (!u.visible) return;
 
             const canAfford = game.resources[u.currency] >= u.cost;
             const disabled = canAfford ? '' : 'disabled';
             
-            let text = `buy ${u.name.toLowerCase()} (${u.cost} ${u.currency === 'braindead' ? 'bd' : 'id'})`;
+            let text = `buy ${u.name.toLowerCase()} (${Math.floor(u.cost)} ${u.currency === 'braindead' ? 'bd' : 'id'})`;
             if (u.count > 0) text += ` [owned: ${u.count}]`;
             
             html += `<button class="cmd-btn" ${disabled} onclick="game.buyUpgrade('${u.id}')" title="${u.description}">${text}</button>`;
@@ -154,17 +246,49 @@ class TerminalUI {
 
     getResearchHTML(game) {
         let html = '';
-        Object.values(game.research).forEach(r => {
-            if (r.purchased) return;
-            
-            if (!r.visible && r.unlockCondition && r.unlockCondition(game)) r.visible = true;
-            if (!r.visible) return;
-
-            const canAfford = game.resources[r.currency] >= r.cost;
-            const disabled = canAfford ? '' : 'disabled';
-            
-            html += `<button class="cmd-btn" ${disabled} onclick="game.buyResearch('${r.id}')" title="${r.description}">research ${r.name.toLowerCase()} (${r.cost} id)</button>`;
+        const availableResearch = Object.values(game.research).filter(r => {
+            if (r.purchased) return false; // Hide purchased
+            if (r.visible) return true;
+            return false;
         });
+
+        if (availableResearch.length === 0) {
+            html += `<div style="color: var(--dim-text);">No research available.</div>`;
+        } else {
+            availableResearch.forEach(r => {
+                const canAfford = game.resources[r.currency] >= r.cost;
+                const prereqMet = !r.prereq || game.research[r.prereq].purchased;
+                const disabled = (!canAfford || !prereqMet) ? 'disabled' : '';
+                
+                let text = `research ${r.name.toLowerCase()} (${r.cost} ${r.currency})`;
+                
+                html += `<button class="cmd-btn" ${disabled} onclick="game.buyResearch('${r.id}')" title="${r.description}">${text}</button>`;
+            });
+        }
+        return html;
+    }
+
+    getVaccinesHTML(game) {
+        let html = '';
+        const availableVaccines = Object.values(game.vaccines).filter(v => {
+            if (v.purchased) return false; // Hide purchased
+            if (v.visible) return true;
+            return false;
+        });
+
+        if (availableVaccines.length === 0) {
+            html += `<div style="color: var(--dim-text);">No vaccines available.</div>`;
+        } else {
+            availableVaccines.forEach(v => {
+                const canAfford = game.resources[v.currency] >= v.cost;
+                const prereqMet = !v.prereq || game.vaccines[v.prereq].purchased;
+                const disabled = (!canAfford || !prereqMet) ? 'disabled' : '';
+                
+                let text = `buy ${v.name.toLowerCase()} (${v.cost} ${v.currency})`;
+                
+                html += `<button class="cmd-btn" ${disabled} onclick="game.buyVaccine('${v.id}')" title="${v.description}">${text}</button>`;
+            });
+        }
         return html;
     }
 
@@ -199,7 +323,17 @@ class TerminalUI {
         const offlineState = game.options.offlineProgress ? 'ON' : 'OFF';
         html += `<button class="cmd-btn" onclick="game.options.offlineProgress = !game.options.offlineProgress; game.save();">offline progress: ${offlineState}</button>`;
         
+        html += `<div style="margin-top: 10px; color: var(--dim-text);">Screen Brightness: <span id="brightness-val">${game.options.brightness}%</span></div>`;
+        html += `<div style="display: flex; gap: 10px; margin-bottom: 10px;">`;
+        html += `<button class="cmd-btn" onclick="game.options.brightness = Math.max(50, game.options.brightness - 10); document.getElementById('brightness-val').textContent = game.options.brightness + '%'; game.ui.applyBrightness(game.options.brightness); game.save();">[ - ]</button>`;
+        html += `<button class="cmd-btn" onclick="game.options.brightness = Math.min(150, game.options.brightness + 10); document.getElementById('brightness-val').textContent = game.options.brightness + '%'; game.ui.applyBrightness(game.options.brightness); game.save();">[ + ]</button>`;
+        html += `</div>`;
+        
         return html;
+    }
+
+    applyBrightness(value) {
+        document.body.style.filter = `brightness(${value}%)`;
     }
 
     exportSave() {
