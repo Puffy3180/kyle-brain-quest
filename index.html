@@ -8,134 +8,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar: Resources -->
-        <div class="sidebar" id="sidebar-section">
-            <div class="header">
-                <h1>KYLE'S<br>BRAINQUEST</h1>
-            </div>
-            <div class="resource-display">
-                <div class="section-title">Resources</div>
-                <div class="resource-item">
-                    <div class="resource-name">Braindead <span id="res-braindead-rate" class="resource-rate"></span></div>
-                    <div class="resource-value" id="res-braindead">0</div>
-                </div>
-                <div class="resource-item">
-                    <div class="resource-name">Ideas <span id="res-ideas-rate" class="resource-rate"></span></div>
-                    <div class="resource-value" id="res-ideas">0.0</div>
-                </div>
-                <div class="resource-item" id="immunity-display" style="display: none;">
-                    <div class="resource-name">Immunity</div>
-                    <div class="resource-value" id="res-immunity">100</div>
-                </div>
-                <div class="resource-item" id="currency-display" style="display: none;">
-                    <div class="resource-name">Currency</div>
-                    <div class="resource-value" id="res-currency">0</div>
-                </div>
-                <div class="resource-item" id="suspicion-display" style="display: none;">
-                    <div class="resource-name">Suspicion</div>
-                    <div class="resource-value" id="res-suspicion">0%</div>
-                </div>
-            </div>
-            
-            <button id="settings-button" class="settings-btn">SETTINGS</button>
+    <div class="terminal-container">
+        <!-- Top Bar: Resources (Hidden initially) -->
+        <div id="resource-strip" class="resource-strip" style="display: none;">
+            <!-- Injected by JS -->
         </div>
 
-        <!-- Settings Modal -->
-        <div id="settings-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>SETTINGS</h2>
-                    <button id="close-settings" class="close-btn">×</button>
-                </div>
-                
-                <div class="modal-section">
-                    <h3>OPTIONS</h3>
-                    <div class="setting-row">
-                        <span>Offline Progress</span>
-                        <label class="switch">
-                            <input type="checkbox" id="offline-toggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
+        <!-- Main Area -->
+        <div class="main-area">
+            <!-- Left: ASCII Art / Visuals -->
+            <div id="visual-area" class="visual-area">
+                <pre id="ascii-art"></pre>
+            </div>
 
-                <div class="modal-section">
-                    <h3>SAVE MANAGEMENT</h3>
-                    <div class="save-controls">
-                        <button id="export-save-btn" class="action-btn">Export Save</button>
-                        <button id="import-save-btn" class="action-btn">Import Save</button>
-                    </div>
-                    <textarea id="save-data-area" readonly placeholder="Save data will appear here..."></textarea>
-                    <button id="hard-reset-btn" class="danger-btn">HARD RESET GAME</button>
-                </div>
+            <!-- Right: Log / Controls -->
+            <div id="terminal-area" class="terminal-area">
+                <div id="log-display" class="log-display"></div>
+                <div id="controls-area" class="controls-area"></div>
             </div>
         </div>
 
-        <!-- Flash Overlay -->
-        <div id="flash-overlay"></div>
-
-        <!-- Main Content: Brainharvest -->
-        <div class="main-content">
-            <div class="brain-container" id="brain-section">
-                <button id="brain-button" class="brain-btn">
-                    <div class="brain-icon">🧠</div>
-                    <div class="brain-glow"></div>
-                    <div class="brain-particles"></div>
-                </button>
-            </div>
-
-            <div class="panels-container" id="panels-section">
-                <!-- Upgrades Panel -->
-                <div class="panel upgrades-panel">
-                    <h2>UPGRADES</h2>
-                    <div class="upgrade-list" id="upgrade-list">
-                        <!-- Upgrades injected by JS -->
-                    </div>
-                </div>
-
-                <!-- Research Panel -->
-                <div class="panel research-panel">
-                    <h2>RESEARCH</h2>
-                    <div class="upgrade-list" id="research-list">
-                         <!-- Research injected by JS -->
-                    </div>
-                </div>
-            <!-- Job Panel (Hidden initially) -->
-            <div class="panel job-panel" id="job-panel" style="display: none;">
-                <h2>JOB CENTER</h2>
-                <div class="job-info">
-                    <div class="current-job" id="current-job-name">Unemployed</div>
-                    <div class="job-stats">
-                        <div>Salary: <span id="job-salary">0</span></div>
-                        <div>Max Currency: <span id="job-max-currency">0</span></div>
-                    </div>
-                </div>
-                <div class="job-actions">
-                    <button id="btn-work" class="action-btn">Work (+<span id="work-amount">0</span>)</button>
-                    <button id="btn-steal" class="action-btn danger-btn">Steal</button>
-                </div>
-                <div class="job-upgrades" id="job-upgrades-list">
-                    <!-- Job upgrades/promotions -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-        <!-- Log Panel -->
-        <div class="log-panel" id="log-section">
-            <div class="log-header">
-                <h2>NEURAL LOG</h2>
-                <div class="log-tabs">
-                    <button class="log-tab active">All</button>
-                    <button class="log-tab">Resources</button>
-                    <button class="log-tab">Lore</button>
-                </div>
-            </div>
-            <div id="log-content" class="log-content">
-                <!-- Logs go here -->
-            </div>
+        <!-- Navigation Tabs (Hidden initially) -->
+        <div id="nav-strip" class="nav-strip" style="display: none;">
+            <!-- Injected by JS -->
         </div>
     </div>
 
