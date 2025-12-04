@@ -16,6 +16,7 @@ class Game {
         };
 
         this.brainSize = 1; // Multiplier for caps
+        this.scalingMulti = 0.5; // Multiplier for idea gain past softcap
 
         this.production = {
             braindead: 0,
@@ -53,28 +54,30 @@ class Game {
         };
 
         // Initialize UI Manager
-        this.ui = new UIManager(this);
+        this.ui = new TerminalUI(this);
 
+        this.isReady = false;
         this.init();
     }
 
     init() {
+        this.ui.init(); // Initialize Terminal UI listeners
         this.setupEventListeners();
         
         const saveExists = localStorage.getItem('kylesBrainquestSave');
         
         if (saveExists) {
             this.ui.hideAll(); // Ensure hidden first
-            this.ui.playMaterializeSequence(() => {
-                this.load();
-                this.gameLoop();
-            });
+            this.load();
+            this.isReady = true;
+            this.gameLoop();
         } else {
             // New Game: Hide UI and play intro
             this.ui.hideAll();
             this.ui.playIntroSequence(() => {
+                this.isReady = true;
                 this.gameLoop();
-                this.log("Welcome to Kyle's Brainquest.", "lore");
+                this.log("System online.", "lore");
             });
         }
         
@@ -86,10 +89,13 @@ class Game {
     }
 
     save() {
+        if (!this.isReady) return; // Don't save if not ready
+        
         const saveData = {
             resources: this.resources,
             caps: this.caps,
             brainSize: this.brainSize,
+            scalingMulti: this.scalingMulti,
             production: this.production,
             productionMultipliers: this.productionMultipliers,
             clickValue: this.clickValue,
@@ -140,6 +146,7 @@ class Game {
             if (saveData.resources) this.resources = { ...this.resources, ...saveData.resources };
             if (saveData.caps) this.caps = { ...this.caps, ...saveData.caps };
             if (saveData.brainSize) this.brainSize = saveData.brainSize;
+            if (saveData.scalingMulti) this.scalingMulti = saveData.scalingMulti;
             if (saveData.production) this.production = { ...this.production, ...saveData.production };
             if (saveData.productionMultipliers) this.productionMultipliers = { ...this.productionMultipliers, ...saveData.productionMultipliers };
             if (saveData.clickValue) this.clickValue = { ...this.clickValue, ...saveData.clickValue };
@@ -208,10 +215,17 @@ class Game {
             }
 
             if (isInitialLoad) {
-                // No log on initial load
+                // Check if we should reveal everything based on progress
+                if (this.resources.braindead > 0) {
+                    this.ui.checkProgression(this);
+                } else {
+                     // If 0 braindead (new save?), just show brain
+                     this.ui.revealBrain();
+                }
             } else {
                 this.log("Save imported successfully!", "general");
                 this.save();
+                this.ui.checkProgression(this);
             }
 
             this.updateUI();
@@ -231,82 +245,9 @@ class Game {
     }
 
     setupEventListeners() {
-        document.getElementById('brain-button').addEventListener('click', (e) => {
-            this.clickBrain(e);
-        });
-
-        const tabs = document.querySelectorAll('.log-tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                this.currentLogFilter = tab.textContent.toLowerCase();
-                this.ui.renderLogs(this.logs, this.currentLogFilter);
-            });
-        });
-
-        // Settings Modal
-        const modal = document.getElementById('settings-modal');
-        const settingsBtn = document.getElementById('settings-button');
-        const closeBtn = document.getElementById('close-settings');
-        const exportBtn = document.getElementById('export-save-btn');
-        const importBtn = document.getElementById('import-save-btn');
-        const hardResetBtn = document.getElementById('hard-reset-btn');
-        const offlineToggle = document.getElementById('offline-toggle');
-        const saveArea = document.getElementById('save-data-area');
-
-        if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                modal.style.display = 'flex';
-                saveArea.value = '';
-            });
-        }
-
-        if (closeBtn) closeBtn.addEventListener('click', () => modal.style.display = 'none');
-
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                const saveString = this.save();
-                saveArea.value = saveString;
-                saveArea.select();
-                document.execCommand('copy');
-                this.log("Save copied to clipboard!", "general");
-                exportBtn.textContent = "Copied!";
-                setTimeout(() => exportBtn.textContent = "Export Save", 2000);
-            });
-        }
-
-        if (importBtn) {
-            importBtn.addEventListener('click', () => {
-                const saveString = prompt("Paste your save string here:");
-                if (saveString) {
-                    this.importSave(saveString);
-                    modal.style.display = 'none';
-                }
-            });
-        }
-
-        if (hardResetBtn) {
-            hardResetBtn.addEventListener('click', () => {
-                if (confirm("Are you sure you want to HARD RESET? This will wipe all progress.")) {
-                    this.reset();
-                }
-            });
-        }
-
-        if (offlineToggle) {
-            offlineToggle.addEventListener('change', (e) => {
-                this.options.offlineProgress = e.target.checked;
-                this.save();
-                this.log(`Offline progress ${this.options.offlineProgress ? 'enabled' : 'disabled'}.`, "general");
-            });
-        }
-
-        const workBtn = document.getElementById('btn-work');
-        const stealBtn = document.getElementById('btn-steal');
+        // Most listeners are handled by TerminalUI or dynamic button creation
         
-        if (workBtn) workBtn.addEventListener('click', () => this.work());
-        if (stealBtn) stealBtn.addEventListener('click', () => this.steal());
+        // Autosave on unload is handled in init
     }
     reset() {
         localStorage.removeItem('kylesBrainquestSave');
@@ -328,7 +269,9 @@ class Game {
         const immunityMult = 100 / this.resources.immunity;
         const gain = this.clickValue.braindead * immunityMult;
         this.addResource('braindead', gain);
-        this.ui.createFloatingText(e.clientX, e.clientY, `+${gain.toFixed(1)} Bd`);
+        
+        // Optional: Add log for click? Might spam.
+        // this.log(`+${gain.toFixed(1)} Bd`);
     }
 
     addResource(type, amount) {
@@ -362,35 +305,35 @@ class Game {
         }
     }
 
-    checkCaps() {
-        // Soft/Hard caps logic
-        // Softcap begins at 500 * Brain Size / Immunity
-        // Hardcap at 1000 * Brain Size / Immunity
-        
+    calculateCaps() {
         const immunityFactor = Math.max(1, this.resources.immunity);
-        const softCap = (50000 * this.brainSize) / immunityFactor;
-        const hardCap = (100000 * this.brainSize) / immunityFactor;
         
-        // Apply caps to Ideas? The planning doc says "IDEAS ARE HARDCAPPED AND SOFTCAPPED BASED ON IMMUNITY"
-        // But also "THERE IS A MAX BRAINDEAD/CAP(necrotic shell increases it)"
-        
-        // Let's apply immunity-based caps to Ideas
-        if (this.resources.ideas > hardCap) {
-            this.resources.ideas = hardCap;
-        } else if (this.resources.ideas > softCap) {
-            // Softcap: drastically reduced production? 
-            // For now, just hard cap at hardCap. 
-            // Maybe reduce production in gameLoop if > softCap?
-            // Implementing simple hard cap for now based on text.
-        }
+        // Ideas Caps
+        const ideasSoftCap = (50000 * this.brainSize) / immunityFactor;
+        const ideasHardCap = (100000 * this.brainSize) / immunityFactor;
 
         // Braindead Cap
-        // Calculate dynamic cap based on base cap (100), brain size, and immunity
-        // Multiplier 1000 ensures starting cap is 1000 (at 100 immunity) to allow early upgrades
         const braindeadCap = (this.caps.braindead * this.brainSize * 1000) / immunityFactor;
-        
-        if (this.resources.braindead > braindeadCap) {
-            this.resources.braindead = braindeadCap;
+
+        return {
+            ideas: {
+                soft: ideasSoftCap,
+                hard: ideasHardCap
+            },
+            braindead: braindeadCap
+        };
+    }
+
+    checkCaps() {
+        const caps = this.calculateCaps();
+
+        // Enforce Hard Caps
+        if (this.resources.ideas > caps.ideas.hard) {
+            this.resources.ideas = caps.ideas.hard;
+        }
+
+        if (this.resources.braindead > caps.braindead) {
+            this.resources.braindead = caps.braindead;
         }
         
         // Currency Cap
@@ -500,8 +443,19 @@ class Game {
         
         if (dt >= 0.1) {
             const immunityMult = 100 / this.resources.immunity;
+            
+            // Calculate Caps
+            const caps = this.calculateCaps();
+            
+            // Braindead Production
             this.resources.braindead += (this.production.braindead * this.productionMultipliers.braindead * immunityMult) * dt;
-            this.resources.ideas += this.production.ideas * this.productionMultipliers.ideas * dt;
+            
+            // Ideas Production with Soft Cap Logic
+            let ideasProduction = this.production.ideas * this.productionMultipliers.ideas * dt;
+            if (this.resources.ideas > caps.ideas.soft) {
+                ideasProduction *= this.scalingMulti; // Penalty if above soft cap
+            }
+            this.resources.ideas += ideasProduction;
             
             this.checkCaps();
             
