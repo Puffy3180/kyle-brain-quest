@@ -10,6 +10,8 @@ class Game {
             suspicion: 0
         };
 
+        this.saveVersion = 1; // Current save version
+
         this.caps = {
             braindead: 500, // Base cap
             ideas: 5 // Base cap
@@ -95,6 +97,7 @@ class Game {
         if (!this.isReady || this.isResetting) return; // Don't save if not ready or resetting
         
         const saveData = {
+            version: this.saveVersion,
             resources: this.resources,
             caps: this.caps,
             brainSize: this.brainSize,
@@ -149,7 +152,10 @@ class Game {
                 // Not base64 or decode failed, assume plain JSON
             }
 
-            const saveData = JSON.parse(jsonString);
+            let saveData = JSON.parse(jsonString);
+            
+            // Migrate save data if needed
+            saveData = this.migrateSave(saveData);
             
             if (saveData.resources) this.resources = { ...this.resources, ...saveData.resources };
             if (saveData.caps) this.caps = { ...this.caps, ...saveData.caps };
@@ -281,6 +287,39 @@ class Game {
             console.error("Failed to load save:", e);
             if (!isInitialLoad) alert("Invalid save data!");
         }
+
+    }
+
+    migrateSave(saveData) {
+        // If version is missing, it's version 0 (pre-migration system)
+        const version = saveData.version || 0;
+        
+        if (version < this.saveVersion) {
+            console.log(`Migrating save from v${version} to v${this.saveVersion}...`);
+            
+            // Migration: v0 -> v1
+            if (version < 1) {
+                // Ensure all resource keys exist
+                if (!saveData.resources) saveData.resources = {};
+                if (saveData.resources.braindead === undefined) saveData.resources.braindead = 0;
+                if (saveData.resources.ideas === undefined) saveData.resources.ideas = 0;
+                if (saveData.resources.immunity === undefined) saveData.resources.immunity = 100;
+                if (saveData.resources.currency === undefined) saveData.resources.currency = 0;
+                if (saveData.resources.suspicion === undefined) saveData.resources.suspicion = 0;
+                
+                // Ensure other critical objects exist
+                if (!saveData.caps) saveData.caps = { braindead: 500, ideas: 5 };
+                if (!saveData.production) saveData.production = { braindead: 0, ideas: 0 };
+                if (!saveData.productionMultipliers) saveData.productionMultipliers = { braindead: 1, ideas: 1 };
+                
+                // v1 adds versioning, so we just return the sanitized object
+                saveData.version = 1;
+            }
+            
+            // Future migrations can go here (e.g., if (version < 2) { ... })
+        }
+        
+        return saveData;
     }
 
     setupEventListeners() {
@@ -312,6 +351,8 @@ class Game {
         
         // Optional: Add log for click? Might spam.
         // this.log(`+${gain.toFixed(1)} Bd`);
+
+        this.log(`+${gain.toFixed(1)} Bd`);
     }
 
     addResource(type, amount) {
