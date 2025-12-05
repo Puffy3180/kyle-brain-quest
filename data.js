@@ -285,7 +285,7 @@ function getInitialVaccines() {
             id: 'vaccineV1',
             name: "Vaccine V1",
             description: "Reduces immunity.",
-            cost: 0,
+            cost: 25,
             currency: "ideas",
             purchased: false,
             prereq: null,

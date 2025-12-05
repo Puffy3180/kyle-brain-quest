@@ -539,7 +539,7 @@ class Game {
             // Reset Upgrades & Research & Vaccines
              Object.values(this.upgrades).forEach(u => { u.count = 0; });
              Object.values(this.research).forEach(r => { r.purchased = false; r.visible = false; });
-             Object.values(this.vaccines).forEach(v => { v.purchased = false; v.visible = false; });
+             // Vaccines are NOT reset (Milestones)
 
             // Apply global multiplier
             this.productionMultipliers.braindead *= 2.5; // Total 2.5x? Or additional? Text says "2.5x multiplier(total)"

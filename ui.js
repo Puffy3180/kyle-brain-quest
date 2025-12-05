@@ -126,17 +126,18 @@ class TerminalUI {
         }
         
         if (res.ideas > 0) {
-            html += `<div class="res-item">Ideas: <span class="res-val">${res.ideas.toFixed(1)}</span>`;
+            html += `<div class="res-item">Ideas: <span class="res-val">${res.ideas.toFixed(2)}</span>`;
             if (res.ideas >= caps.ideas.hard) {
                 html += `<span class="res-capped">(MAX)</span>`;
             } else if (ideasRate > 0) {
-                html += `<span class="res-rate">(+${ideasRate.toFixed(1)}/s)</span>`;
+                html += `<span class="res-rate">(+${ideasRate.toFixed(2)}/s)</span>`;
             }
             html += `</div>`;
         }
-
+        
+        //decimal place manipulation
         if (res.immunity < 100) html += `<div class="res-item">Immunity: <span class="res-val">${Math.floor(res.immunity)}</span></div>`;
-        if (res.currency > 0) html += `<div class="res-item">Currency: <span class="res-val">${Math.floor(res.currency)}</span></div>`;
+        if (res.currency > 0) html += `<div class="res-item">Currency: <span class="res-val">${res.currency.toFixed(2)}</span></div>`;
 
         if (this.lastResourceHTML !== html) {
             this.elements.resourceStrip.innerHTML = html;
