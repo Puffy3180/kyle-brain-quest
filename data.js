@@ -285,13 +285,12 @@ function getInitialVaccines() {
             id: 'vaccineV1',
             name: "Vaccine V1",
             description: "Reduces immunity.",
-            cost: 52345234234523452345,
+            cost: 0,
             currency: "ideas",
             purchased: false,
             prereq: null,
             effect: function(game) {
-                game.resources.immunity = Math.max(1, game.resources.immunity - 10);
-                game.log("Immunity reduced! Braindead gain increased.", "general");
+                game.triggerVaccine(1);
             },
             // reset all progress except for immunity + make this vaccine unable to be bought
             // apply 1.5x buff(multiplicative of other buffs) to ideas and braindead

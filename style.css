@@ -85,9 +85,7 @@ body {
     transition: background-color 0.2s;
 }
 
-#brain-wrapper:hover {
-    background-color: rgba(255, 255, 255, 0.02); /* Subtle hover hint */
-}
+
 
 #click-feedback {
     min-height: 20px;
@@ -270,4 +268,49 @@ body {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
     70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(255, 68, 68, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+
+/* Tooltips */
+.tooltip-container {
+    position: relative;
+    display: block; /* Ensure it takes full width like the button */
+    width: 100%;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 250px;
+    background-color: #222;
+    color: #fff;
+    text-align: left;
+    border: 1px solid var(--dim-text);
+    padding: 10px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.9em;
+    pointer-events: none; /* Let clicks pass through if needed */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Arrow for tooltip */
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--dim-text) transparent transparent transparent;
 }

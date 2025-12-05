@@ -10,7 +10,12 @@ class Game {
             suspicion: 0
         };
 
-        this.saveVersion = 1; // Current save version
+        this.saveVersion = 2; // Current save version
+
+        this.tabUnlocks = {
+            upgrades: false,
+            research: false
+        };
 
         this.caps = {
             braindead: 500, // Base cap
@@ -99,6 +104,7 @@ class Game {
         const saveData = {
             version: this.saveVersion,
             resources: this.resources,
+            tabUnlocks: this.tabUnlocks,
             caps: this.caps,
             brainSize: this.brainSize,
             scalingMulti: this.scalingMulti,
@@ -166,6 +172,7 @@ class Game {
             if (saveData.clickValue) this.clickValue = { ...this.clickValue, ...saveData.clickValue };
             if (saveData.currentJob) this.currentJob = saveData.currentJob;
             if (saveData.options) this.options = { ...this.options, ...saveData.options };
+            if (saveData.tabUnlocks) this.tabUnlocks = { ...this.tabUnlocks, ...saveData.tabUnlocks };
             
             // Validate critical values
             if (isNaN(this.resources.braindead)) this.resources.braindead = 0;
@@ -315,8 +322,19 @@ class Game {
                 // v1 adds versioning, so we just return the sanitized object
                 saveData.version = 1;
             }
+
+            // Migration: v1 -> v2
+            if (version < 2) {
+                if (!saveData.tabUnlocks) {
+                    saveData.tabUnlocks = {
+                        upgrades: (saveData.resources && saveData.resources.braindead >= 10),
+                        research: (saveData.resources && saveData.resources.ideas > 0)
+                    };
+                }
+                saveData.version = 2;
+            }
             
-            // Future migrations can go here (e.g., if (version < 2) { ... })
+            // Future migrations can go here (e.g., if (version < 3) { ... })
         }
         
         return saveData;
@@ -534,6 +552,16 @@ class Game {
     }
 
     checkUnlocks() {
+        // Tab Unlocks
+        if (!this.tabUnlocks.upgrades && this.resources.braindead >= 10) {
+            this.tabUnlocks.upgrades = true;
+            this.updateUI(); // Force update to show tab
+        }
+        if (!this.tabUnlocks.research && this.resources.ideas > 0) {
+            this.tabUnlocks.research = true;
+            this.updateUI();
+        }
+
         // Helper to check a collection
         const check = (collection) => {
             Object.values(collection).forEach(item => {

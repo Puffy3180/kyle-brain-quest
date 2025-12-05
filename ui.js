@@ -161,8 +161,8 @@ class TerminalUI {
         if (this.elements.navStrip.style.display === 'none') return;
 
         const views = ['main'];
-        if (game.resources.braindead >= 10) views.push('upgrades');
-        if (game.resources.ideas > 0) views.push('research');
+        if (game.tabUnlocks.upgrades) views.push('upgrades');
+        if (game.tabUnlocks.research) views.push('research');
         if (game.research.immunityResearch.purchased) {
             views.push('vaccines');
         }
@@ -242,7 +242,11 @@ class TerminalUI {
             let text = `buy ${u.name.toLowerCase()} (${Math.floor(u.cost)} ${u.currency === 'braindead' ? 'bd' : 'id'})`;
             if (u.count > 0) text += ` [owned: ${u.count}]`;
             
-            html += `<button class="cmd-btn" ${disabled} onclick="game.buyUpgrade('${u.id}')" title="${u.description}">${text}</button>`;
+            html += `
+            <div class="tooltip-container">
+                <button class="cmd-btn" ${disabled} onclick="game.buyUpgrade('${u.id}')">${text}</button>
+                <span class="tooltip-text">${u.description}</span>
+            </div>`;
         });
         return html;
     }
@@ -265,7 +269,11 @@ class TerminalUI {
                 
                 let text = `research ${r.name.toLowerCase()} (${r.cost} ${r.currency})`;
                 
-                html += `<button class="cmd-btn" ${disabled} onclick="game.buyResearch('${r.id}')" title="${r.description}">${text}</button>`;
+                html += `
+                <div class="tooltip-container">
+                    <button class="cmd-btn" ${disabled} onclick="game.buyResearch('${r.id}')">${text}</button>
+                    <span class="tooltip-text">${r.description}</span>
+                </div>`;
             });
         }
         return html;
@@ -289,7 +297,11 @@ class TerminalUI {
                 
                 let text = `buy ${v.name.toLowerCase()} (${v.cost} ${v.currency})`;
                 
-                html += `<button class="cmd-btn" ${disabled} onclick="game.buyVaccine('${v.id}')" title="${v.description}">${text}</button>`;
+                html += `
+                <div class="tooltip-container">
+                    <button class="cmd-btn" ${disabled} onclick="game.buyVaccine('${v.id}')">${text}</button>
+                    <span class="tooltip-text">${v.description}</span>
+                </div>`;
             });
         }
         return html;
