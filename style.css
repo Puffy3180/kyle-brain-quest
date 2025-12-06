@@ -144,6 +144,32 @@ body {
     flex-direction: column;
     min-height: 0;
     padding-left: 20px;
+    border-left: 1px solid var(--dim-text); /* Add separator */
+}
+
+.purchase-log-overlay {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 20px;
+    width: 250px;
+    background: rgba(17, 17, 17, 0.9); /* Dark semi-transparent bg */
+    border: 1px solid var(--dim-text);
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    z-index: 1000;
+}
+
+.log-header {
+    color: var(--highlight);
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--dim-text);
+    padding-bottom: 5px;
 }
 
 .log-display {
@@ -151,14 +177,17 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Bottom align logs */
+    /* justify-content: flex-end; Removed to fix scrolling */
     font-size: 0.9em;
     color: var(--dim-text);
     padding-right: 10px;
 }
 
 .log-line {
-    margin-top: 4px;
+    margin-top: 8px;
+    padding: 4px 0;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 0.5s ease;
 }
 
@@ -270,47 +299,22 @@ body {
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
 }
 
-/* Tooltips */
-.tooltip-container {
-    position: relative;
-    display: block; /* Ensure it takes full width like the button */
-    width: 100%;
-}
-
-.tooltip-text {
-    visibility: hidden;
-    width: 250px;
+/* Global Tooltip */
+.global-tooltip {
+    position: fixed;
+    z-index: 1000;
     background-color: #222;
     color: #fff;
-    text-align: left;
     border: 1px solid var(--dim-text);
     padding: 10px;
     border-radius: 4px;
-    position: absolute;
-    z-index: 10;
-    bottom: 125%; /* Position above the button */
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
     font-size: 0.9em;
-    pointer-events: none; /* Let clicks pass through if needed */
+    pointer-events: none;
     box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    display: none;
+    max-width: 300px;
 }
 
-.tooltip-container:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-}
-
-/* Arrow for tooltip */
-.tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: var(--dim-text) transparent transparent transparent;
+.global-tooltip.visible {
+    display: block;
 }

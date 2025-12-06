@@ -8,6 +8,7 @@ class TerminalUI {
             visualArea: document.getElementById('visual-area'),
             asciiArt: document.getElementById('ascii-art'),
             logDisplay: document.getElementById('log-display'),
+            purchaseLogDisplay: document.getElementById('purchase-log-display'),
             controlsArea: document.getElementById('controls-area'),
             navStrip: document.getElementById('nav-strip')
         };
@@ -64,7 +65,13 @@ class TerminalUI {
         // Prevent double-click selection
         this.elements.brainWrapper.addEventListener('mousedown', (e) => e.preventDefault());
         
+        this.elements.brainWrapper.addEventListener('mousedown', (e) => e.preventDefault());
+        
         this.feedbackTimeout = null;
+
+        // Global Tooltip
+        this.elements.tooltip = document.getElementById('global-tooltip');
+        document.addEventListener('mousemove', (e) => this.updateTooltipPosition(e));
     }
 
     update(game) {
@@ -116,7 +123,8 @@ class TerminalUI {
         }
 
         if (res.braindead > 0) {
-            html += `<div class="res-item">Braindead: <span class="res-val">${Math.floor(res.braindead)}</span>`;
+            const bdTooltip = `Base: ${Math.floor(game.caps.braindead)} x Brain Size: ${game.brainSize}`;
+            html += `<div class="res-item" onmouseenter="game.ui.showTooltip('${bdTooltip}')" onmouseleave="game.ui.hideTooltip()">Braindead: <span class="res-val">${Math.floor(res.braindead)}</span>`;
             if (res.braindead >= caps.braindead) {
                 html += `<span class="res-capped">(MAX)</span>`;
             } else if (bdRate > 0) {
@@ -164,11 +172,11 @@ class TerminalUI {
         const views = ['main'];
         if (game.tabUnlocks.upgrades) views.push('upgrades');
         if (game.tabUnlocks.research) views.push('research');
-        if (game.research.immunityResearch.purchased) {
+        if (game.tabUnlocks.vaccines) {
             views.push('vaccines');
         }
         
-        if (game.research.getAJob && game.research.getAJob.purchased) {
+        if (game.tabUnlocks.jobs) {
             views.push('jobs');
         } let html = '';
         views.forEach(view => {
@@ -223,7 +231,7 @@ class TerminalUI {
         } else if (this.currentView === 'jobs') {
             html = this.getJobsHTML(game);
         } else if (this.currentView === 'settings') {
-            html = this.getSettingsHTML(game);
+            html = game.settings.getHTML();
         }
 
         if (this.lastControlsHTML !== html) {
@@ -237,17 +245,22 @@ class TerminalUI {
         Object.values(game.upgrades).forEach(u => {
             if (!u.visible) return;
 
-            const canAfford = game.resources[u.currency] >= u.cost;
+            const cost = game.getCost(u); // Use game.getCost(u)
+            const canAfford = game.resources[u.currency] >= cost;
             const disabled = canAfford ? '' : 'disabled';
             
-            let text = `buy ${u.name.toLowerCase()} (${Math.floor(u.cost)} ${u.currency === 'braindead' ? 'bd' : 'id'})`;
+            let text = `buy ${u.name.toLowerCase()} (${Math.floor(cost)} ${u.currency === 'braindead' ? 'bd' : 'id'})`; // Use cost here
             if (u.count > 0) text += ` [owned: ${u.count}]`;
             
+            // Escape description for attribute
+            const desc = u.description.replace(/'/g, "&apos;");
+
             html += `
-            <div class="tooltip-container">
-                <button class="cmd-btn" ${disabled} onclick="game.buyUpgrade('${u.id}')">${text}</button>
-                <span class="tooltip-text">${u.description}</span>
-            </div>`;
+            <button class="cmd-btn" ${disabled} 
+                onclick="game.buyUpgrade('${u.id}')"
+                onmouseenter="game.ui.showTooltip('${desc}')"
+                onmouseleave="game.ui.hideTooltip()"
+            >${text}</button>`;
         });
         return html;
     }
@@ -270,11 +283,14 @@ class TerminalUI {
                 
                 let text = `research ${r.name.toLowerCase()} (${r.cost} ${r.currency})`;
                 
+                const desc = r.description.replace(/'/g, "&apos;");
+
                 html += `
-                <div class="tooltip-container">
-                    <button class="cmd-btn" ${disabled} onclick="game.buyResearch('${r.id}')">${text}</button>
-                    <span class="tooltip-text">${r.description}</span>
-                </div>`;
+                <button class="cmd-btn" ${disabled} 
+                    onclick="game.buyResearch('${r.id}')"
+                    onmouseenter="game.ui.showTooltip('${desc}')"
+                    onmouseleave="game.ui.hideTooltip()"
+                >${text}</button>`;
             });
         }
         return html;
@@ -298,11 +314,14 @@ class TerminalUI {
                 
                 let text = `buy ${v.name.toLowerCase()} (${v.cost} ${v.currency})`;
                 
+                const desc = v.description.replace(/'/g, "&apos;");
+
                 html += `
-                <div class="tooltip-container">
-                    <button class="cmd-btn" ${disabled} onclick="game.buyVaccine('${v.id}')">${text}</button>
-                    <span class="tooltip-text">${v.description}</span>
-                </div>`;
+                <button class="cmd-btn" ${disabled} 
+                    onclick="game.buyVaccine('${v.id}')"
+                    onmouseenter="game.ui.showTooltip('${desc}')"
+                    onmouseleave="game.ui.hideTooltip()"
+                >${text}</button>`;
             });
         }
         return html;
@@ -324,57 +343,27 @@ class TerminalUI {
         return html;
     }
 
-    getSettingsHTML(game) {
-        let html = '';
-        
-        // Save Management
-        html += `<div style="margin-bottom: 5px; color: #fff;">-- SYSTEM --</div>`;
-        html += `<button class="cmd-btn" onclick="game.save(); game.ui.log('Game saved.', 'system')">force save</button>`;
-        html += `<button class="cmd-btn" onclick="game.ui.exportSave()">export save</button>`;
-        html += `<button class="cmd-btn" onclick="game.ui.importSave()">import save</button>`;
-        html += `<button class="cmd-btn" style="color: #ff6666;" onclick="if(confirm('HARD RESET?')) game.reset()">hard reset</button>`;
-        
-        // Options
-        html += `<div style="margin-top: 15px; margin-bottom: 5px; color: #fff;">-- CONFIG --</div>`;
-        const offlineState = game.options.offlineProgress ? 'ON' : 'OFF';
-        html += `<button class="cmd-btn" onclick="game.options.offlineProgress = !game.options.offlineProgress; game.save();">offline progress: ${offlineState}</button>`;
-        
-        html += `<div style="margin-top: 10px; color: var(--dim-text);">Screen Brightness: <span id="brightness-val">${game.options.brightness}%</span></div>`;
-        html += `<div style="display: flex; gap: 10px; margin-bottom: 10px;">`;
-        html += `<button class="cmd-btn" onclick="game.options.brightness = Math.max(50, game.options.brightness - 10); document.getElementById('brightness-val').textContent = game.options.brightness + '%'; game.ui.applyBrightness(game.options.brightness); game.save();">[ - ]</button>`;
-        html += `<button class="cmd-btn" onclick="game.options.brightness = Math.min(150, game.options.brightness + 10); document.getElementById('brightness-val').textContent = game.options.brightness + '%'; game.ui.applyBrightness(game.options.brightness); game.save();">[ + ]</button>`;
-        html += `</div>`;
-        
-        return html;
-    }
-
-    applyBrightness(value) {
-        document.body.style.filter = `brightness(${value}%)`;
-    }
-
-    exportSave() {
-        const saveString = this.game.save();
-        navigator.clipboard.writeText(saveString).then(() => {
-            this.log("Save copied to clipboard.", "system");
-        }).catch(err => {
-            this.log("Failed to copy save.", "system");
-            console.error(err);
-        });
-    }
-
-    importSave() {
-        const saveString = prompt("Paste save string:");
-        if (saveString) {
-            this.game.importSave(saveString);
-        }
-    }
+    // Settings methods moved to settings.js
 
     log(message, type = 'general') {
         const entry = document.createElement('div');
         entry.className = 'log-line new';
         entry.textContent = `> ${message}`;
-        this.elements.logDisplay.appendChild(entry);
-        this.elements.logDisplay.scrollTop = this.elements.logDisplay.scrollHeight;
+        
+        let targetDisplay = this.elements.logDisplay;
+        
+        if (type === 'upgrade' || type === 'unlock') {
+            targetDisplay = this.elements.purchaseLogDisplay;
+        }
+
+        targetDisplay.appendChild(entry);
+
+        // Cap at 50 entries
+        while (targetDisplay.children.length > 50) {
+            targetDisplay.removeChild(targetDisplay.firstChild);
+        }
+
+        targetDisplay.scrollTop = targetDisplay.scrollHeight;
         
         // Remove 'new' class after animation
         setTimeout(() => entry.classList.remove('new'), 500);
@@ -406,5 +395,36 @@ class TerminalUI {
                 }, 1500);
             }, 1500);
         }, 1500);
+    }
+
+    showTooltip(text) {
+        if (!this.elements.tooltip) return;
+        this.elements.tooltip.innerHTML = text;
+        this.elements.tooltip.classList.add('visible');
+    }
+
+    hideTooltip() {
+        if (!this.elements.tooltip) return;
+        this.elements.tooltip.classList.remove('visible');
+    }
+
+    updateTooltipPosition(e) {
+        if (!this.elements.tooltip || !this.elements.tooltip.classList.contains('visible')) return;
+        
+        const offset = 15;
+        let left = e.clientX + offset;
+        let top = e.clientY + offset;
+        
+        // Prevent going off screen
+        const rect = this.elements.tooltip.getBoundingClientRect();
+        if (left + rect.width > window.innerWidth) {
+            left = e.clientX - rect.width - offset;
+        }
+        if (top + rect.height > window.innerHeight) {
+            top = e.clientY - rect.height - offset;
+        }
+        
+        this.elements.tooltip.style.left = `${left}px`;
+        this.elements.tooltip.style.top = `${top}px`;
     }
 }

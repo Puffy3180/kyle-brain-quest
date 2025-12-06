@@ -10,7 +10,7 @@ function getInitialUpgrades() {
             costScale: 1.6,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.clickValue.braindead += 0.5; },
+            effect: function(game, count) { game.clickValue.braindead += 0.5 * count; },
             unlockCondition: function(game) { return game.resources.braindead >= 10; },
             visible: false
         },
@@ -22,7 +22,7 @@ function getInitialUpgrades() {
             costScale: 1.3,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.production.braindead += 1; },
+            effect: function(game, count) { game.production.braindead += 1 * count; },
             baseProduction: { braindead: 1 },
             unlockCondition: function(game) { return game.resources.braindead >= 10; },
             visible: false
@@ -35,7 +35,7 @@ function getInitialUpgrades() {
             costScale: 1.4,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.production.ideas += 0.1; },
+            effect: function(game, count) { game.production.ideas += 0.1 * count; },
             baseProduction: { ideas: 0.1 },
             unlockCondition: function(game) { return game.resources.braindead >= 50; },
             visible: false
@@ -48,7 +48,7 @@ function getInitialUpgrades() {
             costScale: 1.6,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.production.ideas += 0.2; },
+            effect: function(game, count) { game.production.ideas += 0.2 * count; },
             baseProduction: { ideas: 0.2 },
             unlockCondition: function(game) { return game.resources.ideas >= 1; },
             visible: false
@@ -61,7 +61,7 @@ function getInitialUpgrades() {
             costScale: 1.5,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.productionMultipliers.braindead += 0.2; },
+            effect: function(game, count) { game.productionMultipliers.braindead += 0.2 * count; },
             unlockCondition: function(game) { return game.research.necroticTissue && game.research.necroticTissue.purchased; },
             visible: false
         },
@@ -73,7 +73,7 @@ function getInitialUpgrades() {
             costScale: 2.0,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.caps.braindead += 500; },
+            effect: function(game, count) { game.caps.braindead += 500 * count; },
             unlockCondition: function(game) { return game.research.necroticShell && game.research.necroticShell.purchased; },
             visible: false
         },
@@ -85,7 +85,7 @@ function getInitialUpgrades() {
             costScale: 1.4,
             currency: "braindead",
             count: 0,
-            effect: function(game) { game.brainSize += 1; },
+            effect: function(game, count) { game.brainSize += 1 * count; },
             unlockCondition: function(game) { return game.research.neuronicCoating && game.research.neuronicCoating.purchased; },
             visible: false
         },
@@ -97,7 +97,7 @@ function getInitialUpgrades() {
             costScale: 1.2,
             currency: "currency",
             count: 0,
-            effect: function(game) { game.production.braindead += 5; },
+            effect: function(game, count) { game.production.braindead += 5 * count; },
             baseProduction: { braindead: 5 },
             unlockCondition: function(game) { return game.research.biomatterLab && game.research.biomatterLab.purchased; },
             visible: false
@@ -110,7 +110,7 @@ function getInitialUpgrades() {
             costScale: 1.3,
             currency: "currency",
             count: 0,
-            effect: function(game) { game.production.ideas += 0.5; },
+            effect: function(game, count) { game.production.ideas += 0.5 * count; },
             baseProduction: { ideas: 0.5 },
             unlockCondition: function(game) { return game.research.biomatterLab && game.research.biomatterLab.purchased; },
             visible: false

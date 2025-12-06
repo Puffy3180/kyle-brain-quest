@@ -31,8 +31,11 @@
 
             <!-- Right: Log -->
             <div id="log-column" class="log-column">
+                <div class="log-header">SYSTEM LOG</div>
                 <div id="log-display" class="log-display"></div>
             </div>
+
+
         </div>
 
         <!-- Navigation Tabs (Hidden initially) -->
@@ -41,8 +44,24 @@
         </div>
     </div>
 
+    <!-- Purchase Log Overlay -->
+    <div id="purchase-log-column" class="purchase-log-overlay">
+        <div class="log-header">TRANSACTIONS</div>
+        <div id="purchase-log-display" class="log-display"></div>
+    </div>
+
+
+    
+    <!-- These are all of the js files to be used-->
+    <div id="global-tooltip" class="global-tooltip"></div>
     <script src="data.js"></script>
+    <script src="settings.js"></script>
     <script src="ui.js"></script>
+    <script src="managers/ResourceManager.js"></script>
+    <script src="managers/UpgradeManager.js"></script>
+    <script src="managers/ResearchManager.js"></script>
+    <script src="managers/VaccineManager.js"></script>
+    <script src="managers/JobManager.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

@@ -2,50 +2,28 @@
 
 class Game {
     constructor() {
-        this.resources = {
-            braindead: 0,
-            ideas: 0,
-            immunity: 100,
-            currency: 0,
-            suspicion: 0
-        };
+        // Managers
+        this.resourceManager = new ResourceManager(this);
+        this.upgradeManager = new UpgradeManager(this);
+        this.researchManager = new ResearchManager(this);
+        this.vaccineManager = new VaccineManager(this);
+        this.jobManager = new JobManager(this);
+        this.settings = new SettingsManager(this);
 
-        this.saveVersion = 2; // Current save version
+        // Initialize Managers (State)
+        this.resourceManager.init();
+        this.upgradeManager.init();
+        this.researchManager.init();
+        this.vaccineManager.init();
+        this.jobManager.init();
+
+        // Initialize Settings (Save Version etc)
+        // SettingsManager constructor sets saveVersion
 
         this.tabUnlocks = {
             upgrades: false,
             research: false
         };
-
-        this.caps = {
-            braindead: 500, // Base cap
-            ideas: 5 // Base cap
-        };
-
-        this.brainSize = 1; // Multiplier for caps
-        this.scalingMulti = 1.75; // Multiplier for idea gain past softcap
-
-        this.production = {
-            braindead: 0,
-            ideas: 0
-        };
-
-        this.productionMultipliers = {
-            braindead: 1,
-            ideas: 1
-        };
-
-        this.clickValue = {
-            braindead: 1
-        };
-
-        // Initialize from data.js
-        this.upgrades = getInitialUpgrades();
-        this.research = getInitialResearch();
-        this.vaccines = getInitialVaccines();
-        this.jobs = getInitialJobs();
-        this.currentJob = 'intern';
-        this.jobCooldown = 0;
 
         // CPS Limiter
         this.clickCount = 0;
@@ -53,6 +31,7 @@ class Game {
         this.maxCps = 10;
 
         this.lastTick = Date.now();
+        this.lastSave = Date.now(); // Initialize lastSave
         this.tickRate = 100;
 
         this.logs = [];
@@ -74,24 +53,18 @@ class Game {
         this.ui.init(); // Initialize Terminal UI listeners
         this.setupEventListeners();
         
-        const saveExists = localStorage.getItem('kylesBrainquestSave');
+        // Use SettingsManager for loading
+        this.settings.load();
         
-        if (saveExists) {
-            this.ui.hideAll(); // Ensure hidden first
-            this.load();
-            this.isReady = true;
-            this.tick();
-        } else {
-            // New Game: Hide UI and play intro
-            this.ui.hideAll();
-            this.ui.playIntroSequence(() => {
-                this.isReady = true;
-                this.tick();
-                this.log("System online.", "lore");
-            });
-        }
-        
-        // Autosave every 30 seconds
+        // Autosave every 30 seconds (handled in tick or here?)
+        // Original game.js had setInterval here AND check in tick.
+        // settings.js has setupAutosave() but it wasn't called in original game.js.
+        // Let's stick to game.js tick based autosave or setInterval.
+        // Original game.js had:
+        // setInterval(() => this.save(), 30000);
+        // AND in tick: if (now - this.lastSave > 30000) ...
+        // I'll use the tick one for consistency with loop, or setInterval.
+        // Let's use setInterval as in original init (lines 95).
         setInterval(() => this.save(), 30000);
         
         // Save on close/refresh
@@ -99,483 +72,58 @@ class Game {
     }
 
     save() {
-        if (!this.isReady || this.isResetting) return; // Don't save if not ready or resetting
-        
-        const saveData = {
-            version: this.saveVersion,
-            resources: this.resources,
-            tabUnlocks: this.tabUnlocks,
-            caps: this.caps,
-            brainSize: this.brainSize,
-            scalingMulti: this.scalingMulti,
-            production: this.production,
-            productionMultipliers: this.productionMultipliers,
-            clickValue: this.clickValue,
-            currentJob: this.currentJob,
-            upgrades: Object.values(this.upgrades).map(u => ({
-                id: u.id,
-                count: u.count,
-                cost: u.cost,
-                visible: u.visible
-            })),
-            research: Object.values(this.research).map(r => ({
-                id: r.id,
-                purchased: r.purchased,
-                visible: r.visible
-            })),
-            vaccines: Object.values(this.vaccines).map(v => ({
-                id: v.id,
-                purchased: v.purchased,
-                visible: v.visible
-            })),
-            options: this.options,
-            lastTick: Date.now(),
-            logHistory: this.logs.slice(-50) // Save last 50 logs
-        };
-        
-        const saveString = JSON.stringify(saveData);
-        localStorage.setItem('kylesBrainquestSave', btoa(saveString));
-        return btoa(saveString);
+        return this.settings.save();
     }
 
     load() {
-        const saveString = localStorage.getItem('kylesBrainquestSave');
-        if (saveString) {
-            this.importSave(saveString, true);
-        }
-    }
-
-    importSave(saveString, isInitialLoad = false) {
-        try {
-            let jsonString = saveString.trim();
-            try {
-                const decoded = atob(saveString);
-                // Simple check to see if it looks like JSON
-                if (decoded.trim().startsWith('{') || decoded.trim().startsWith('[')) {
-                    jsonString = decoded;
-                }
-            } catch (e) {
-                // Not base64 or decode failed, assume plain JSON
-            }
-
-            let saveData = JSON.parse(jsonString);
-            
-            // Migrate save data if needed
-            saveData = this.migrateSave(saveData);
-            
-            if (saveData.resources) this.resources = { ...this.resources, ...saveData.resources };
-            if (saveData.caps) this.caps = { ...this.caps, ...saveData.caps };
-            if (saveData.brainSize) this.brainSize = saveData.brainSize;
-            if (saveData.scalingMulti) this.scalingMulti = saveData.scalingMulti;
-            if (saveData.production) this.production = { ...this.production, ...saveData.production };
-            if (saveData.productionMultipliers) this.productionMultipliers = { ...this.productionMultipliers, ...saveData.productionMultipliers };
-            if (saveData.clickValue) this.clickValue = { ...this.clickValue, ...saveData.clickValue };
-            if (saveData.currentJob) this.currentJob = saveData.currentJob;
-            if (saveData.options) this.options = { ...this.options, ...saveData.options };
-            if (saveData.tabUnlocks) this.tabUnlocks = { ...this.tabUnlocks, ...saveData.tabUnlocks };
-            
-            // Validate critical values
-            if (isNaN(this.resources.braindead)) this.resources.braindead = 0;
-            if (isNaN(this.resources.ideas)) this.resources.ideas = 0;
-            if (isNaN(this.resources.immunity)) this.resources.immunity = 100;
-            if (isNaN(this.resources.currency)) this.resources.currency = 0;
-            if (isNaN(this.resources.suspicion)) this.resources.suspicion = 0;
-
-            if (saveData.upgrades) {
-                saveData.upgrades.forEach(savedUpgrade => {
-                    const upgrade = this.upgrades[savedUpgrade.id];
-                    if (upgrade) {
-                        upgrade.count = savedUpgrade.count;
-                        upgrade.cost = savedUpgrade.cost;
-                        if (savedUpgrade.visible !== undefined) upgrade.visible = savedUpgrade.visible;
-                    }
-                });
-            }
-
-            if (saveData.research) {
-                saveData.research.forEach(savedResearch => {
-                    const research = this.research[savedResearch.id];
-                    if (research) {
-                        research.purchased = savedResearch.purchased;
-                        if (savedResearch.visible !== undefined) research.visible = savedResearch.visible;
-                    }
-                });
-            }
-
-            if (saveData.vaccines) {
-                saveData.vaccines.forEach(savedVaccine => {
-                    const vaccine = this.vaccines[savedVaccine.id];
-                    if (vaccine) {
-                        vaccine.purchased = savedVaccine.purchased;
-                        if (savedVaccine.visible !== undefined) vaccine.visible = savedVaccine.visible;
-                    }
-                });
-            }
-
-            if (saveData.logHistory) {
-                this.logs = saveData.logHistory;
-                // Restore logs to UI without animation/sound if possible, or just add them
-                this.logs.forEach(entry => {
-                    this.ui.addLog(entry);
-                });
-            }
-            
-            if (isInitialLoad && saveData.lastTick && this.options.offlineProgress) {
-                const now = Date.now();
-                const secondsOffline = (now - saveData.lastTick) / 1000;
-                
-                if (secondsOffline > 60) {
-                    const maxOfflineSeconds = 7200;
-                    const effectiveSeconds = Math.min(secondsOffline, maxOfflineSeconds);
-                    
-                    const immunityMult = 100 / Math.max(1, this.resources.immunity);
-                    const caps = this.calculateCaps();
-
-                    // Calculate potential gains
-                    const potentialBd = (this.production.braindead * immunityMult) * effectiveSeconds;
-                    const potentialIdeas = this.production.ideas * effectiveSeconds;
-                    
-                    // Calculate actual gains by clamping to caps
-                    const currentBd = this.resources.braindead;
-                    const currentIdeas = this.resources.ideas;
-                    
-                    const newBd = Math.min(currentBd + potentialBd, caps.braindead);
-                    // For ideas, we only care about hard cap for offline? Or soft cap penalty?
-                    // Let's just respect hard cap for now to be safe and simple.
-                    // If we want to be perfect we'd integrate the soft cap penalty but that's complex math for offline.
-                    // Let's just cap at hard cap.
-                    const newIdeas = Math.min(currentIdeas + potentialIdeas, caps.ideas.hard);
-                    
-                    const actualBdGained = newBd - currentBd;
-                    const actualIdeasGained = newIdeas - currentIdeas;
-                    
-                    if (actualBdGained > 0 || actualIdeasGained > 0) {
-                        this.resources.braindead = newBd;
-                        this.resources.ideas = newIdeas;
-                        
-                        let msg = `You were gone for ${Math.floor(secondsOffline)}s.`;
-                        if (secondsOffline > maxOfflineSeconds) msg += ` (Capped at 2h)`;
-                        msg += ` Gained ${Math.floor(actualBdGained)} Bd and ${actualIdeasGained.toFixed(1)} Ideas.`;
-                        
-                        this.log(msg, "general");
-                    }
-                }
-            }
-
-            if (isInitialLoad) {
-                // Check if we should reveal everything based on progress
-                if (this.resources.braindead > 0) {
-                    this.ui.checkProgression(this);
-                } else {
-                     // If 0 braindead (new save?), just show brain
-                     this.ui.revealBrain();
-                }
-            } else {
-                this.log("Save imported successfully!", "general");
-                this.save();
-                location.reload(); // Reload to ensure clean state
-            }
-
-            this.updateUI();
-            
-            if (this.research.thinkMore.purchased) {
-                document.getElementById('immunity-display').style.display = 'flex';
-            }
-            
-            const offlineToggle = document.getElementById('offline-toggle');
-            if (offlineToggle) offlineToggle.checked = this.options.offlineProgress;
-
-            // Apply visual settings
-            if (this.options.brightness) {
-                this.ui.applyBrightness(this.options.brightness);
-            }
-
-        } catch (e) {
-            console.error("Failed to load save:", e);
-            if (!isInitialLoad) alert("Invalid save data!");
-        }
-
-    }
-
-    migrateSave(saveData) {
-        // If version is missing, it's version 0 (pre-migration system)
-        const version = saveData.version || 0;
-        
-        if (version < this.saveVersion) {
-            console.log(`Migrating save from v${version} to v${this.saveVersion}...`);
-            
-            // Migration: v0 -> v1
-            if (version < 1) {
-                // Ensure all resource keys exist
-                if (!saveData.resources) saveData.resources = {};
-                if (saveData.resources.braindead === undefined) saveData.resources.braindead = 0;
-                if (saveData.resources.ideas === undefined) saveData.resources.ideas = 0;
-                if (saveData.resources.immunity === undefined) saveData.resources.immunity = 100;
-                if (saveData.resources.currency === undefined) saveData.resources.currency = 0;
-                if (saveData.resources.suspicion === undefined) saveData.resources.suspicion = 0;
-                
-                // Ensure other critical objects exist
-                if (!saveData.caps) saveData.caps = { braindead: 500, ideas: 5 };
-                if (!saveData.production) saveData.production = { braindead: 0, ideas: 0 };
-                if (!saveData.productionMultipliers) saveData.productionMultipliers = { braindead: 1, ideas: 1 };
-                
-                // v1 adds versioning, so we just return the sanitized object
-                saveData.version = 1;
-            }
-
-            // Migration: v1 -> v2
-            if (version < 2) {
-                if (!saveData.tabUnlocks) {
-                    saveData.tabUnlocks = {
-                        upgrades: (saveData.resources && saveData.resources.braindead >= 10),
-                        research: (saveData.resources && saveData.resources.ideas > 0)
-                    };
-                }
-                saveData.version = 2;
-            }
-            
-            // Future migrations can go here (e.g., if (version < 3) { ... })
-        }
-        
-        return saveData;
+        this.settings.load();
     }
 
     setupEventListeners() {
         // Most listeners are handled by TerminalUI or dynamic button creation
-        
-        // Autosave on unload is handled in init
-    }
-    reset() {
-        this.isResetting = true;
-        localStorage.removeItem('kylesBrainquestSave');
-        location.reload();
     }
 
+    // Proxy Methods for UI calls
     clickBrain(e) {
-        const now = Date.now();
-        if (now - this.lastClickReset >= 1000) {
-            this.clickCount = 0;
-            this.lastClickReset = now;
-        }
-
-        if (this.clickCount >= this.maxCps) {
-            return; // Rate limited
-        }
-        this.clickCount++;
-
-        const immunityMult = 100 / this.resources.immunity;
-        const gain = this.clickValue.braindead * immunityMult;
-        this.addResource('braindead', gain);
-        
-        // Optional: Add log for click? Might spam.
-        // this.log(`+${gain.toFixed(1)} Bd`);
-
-        this.log(`+${gain.toFixed(1)} Bd`);
-    }
-
-    addResource(type, amount) {
-        this.resources[type] += amount;
-        this.ui.updateResource(type, this.resources[type]);
+        this.resourceManager.clickBrain();
     }
 
     buyUpgrade(key) {
-        const upgrade = this.upgrades[key];
-        if (this.resources[upgrade.currency] >= upgrade.cost) {
-            this.resources[upgrade.currency] -= upgrade.cost;
-            upgrade.count++;
-            upgrade.cost = Math.floor(upgrade.cost * upgrade.costScale);
-            upgrade.effect(this); // Pass game instance
-            this.log(`Purchased ${upgrade.name}`, "upgrade");
-            this.updateUI();
-        }
+        this.upgradeManager.buyUpgrade(key);
     }
 
     buyResearch(key) {
-        const item = this.research[key];
-        if (!item.purchased && this.resources[item.currency] >= item.cost) {
-            // Check prereqs
-            if (item.prereq && !this.research[item.prereq].purchased) return;
-
-            this.resources[item.currency] -= item.cost;
-            item.purchased = true;
-            item.effect(this); // Pass game instance
-            this.log(`Researched ${item.name}`, "unlock");
-            this.updateUI();
-        }
+        this.researchManager.buyResearch(key);
     }
 
     buyVaccine(key) {
-        const item = this.vaccines[key];
-        if (!item.purchased && this.resources[item.currency] >= item.cost) {
-            // Check prereqs
-            if (item.prereq && !this.vaccines[item.prereq].purchased) return;
-
-            this.resources[item.currency] -= item.cost;
-            item.purchased = true;
-            item.effect(this); // Pass game instance
-            this.log(`Administered ${item.name}`, "unlock");
-            this.updateUI();
-        }
-    }
-
-    calculateCaps() {
-        const immunityFactor = Math.max(1, this.resources.immunity);
-        
-        // Ideas Caps
-        const ideasSoftCap = (500 * this.brainSize) / immunityFactor;
-        const ideasHardCap = (1000 * this.brainSize) / immunityFactor;
-
-        // Braindead Cap
-        const braindeadCap = (this.caps.braindead);
-
-        return {
-            ideas: {
-                soft: ideasSoftCap,
-                hard: ideasHardCap
-            },
-            braindead: braindeadCap
-        };
-    }
-
-    checkCaps() {
-        const caps = this.calculateCaps();
-
-        // Enforce Hard Caps
-        if (this.resources.ideas > caps.ideas.hard) {
-            this.resources.ideas = caps.ideas.hard;
-        }
-
-        if (this.resources.braindead > caps.braindead) {
-            this.resources.braindead = caps.braindead;
-        }
-        
-        // Currency Cap
-        const job = this.jobs[this.currentJob];
-        if (this.resources.currency > job.maxCurrency) {
-            this.resources.currency = job.maxCurrency;
-        }
+        this.vaccineManager.buyVaccine(key);
     }
 
     work() {
-        if (this.jobCooldown > 0) return;
-        
-        const job = this.jobs[this.currentJob];
-        this.resources.currency += job.salary;
-        this.jobCooldown = 5; // 5 seconds cooldown
-        
-        // Suspicion check
-        if (Math.random() * 100 < job.suspicionRate) {
-            this.log("You were fired for suspicious behavior!", "warning");
-            this.currentJob = 'intern'; // Demotion
-            this.resources.suspicion = 0;
-        }
-        
-        this.updateUI();
+        this.jobManager.work();
     }
 
     steal() {
-        if (this.jobCooldown > 0) return;
-        
-        const job = this.jobs[this.currentJob];
-        this.resources.suspicion += 1;
-        this.resources.currency += job.maxCurrency * 0.05;
-        this.jobCooldown = 5;
-        
-        this.updateUI();
+        this.jobManager.steal();
     }
 
     promote(jobId) {
-        // Logic to switch jobs if requirements met
-        // For now, just switch if unlocked
-        if (this.jobs[jobId]) {
-            this.currentJob = jobId;
-            this.updateUI();
-        }
+        this.jobManager.promote(jobId);
     }
 
     triggerVaccine(tier) {
-        if (tier === 1) {
-            // Reset resources
-            this.resources.braindead = 0;
-            this.resources.ideas = 0;
-            this.resources.immunity = 80; // Reduced immunity
-            this.resources.currency = 0;
-            this.resources.suspicion = 0;
-            
-            // Reset Upgrades
-            Object.values(this.upgrades).forEach(u => {
-                u.count = 0;
-                u.cost = u.cost / Math.pow(u.costScale, u.count); // Reset cost roughly (or just reload initial)
-                // Better: re-initialize upgrades but keep some persistent flags if any
-                // For V1, full reset of upgrades
-                u.count = 0;
-                // Re-fetch initial cost from data would be best, but we modified the object.
-                // Let's just manually reset costs for now or reload page logic?
-                // Reloading page logic is safer for full reset.
-            });
-            
-            // Reset Research
-            Object.values(this.research).forEach(r => {
-                r.purchased = false;
-                r.visible = false;
-            });
-
-            // Apply global multiplier
-            this.productionMultipliers.braindead *= 1.5;
-            this.productionMultipliers.ideas *= 1.5;
-            
-            this.log("Vaccine V1 Administered. Immunity reduced.", "lore");
-            this.save();
-            location.reload(); // Simple way to ensure clean state with new saved values (except we need to save the multiplier!)
-            
-        } else if (tier === 2) {
-             // Reset resources
-            this.resources.braindead = 0;
-            this.resources.ideas = 0;
-            this.resources.immunity = 60; // Reduced further?
-            this.resources.currency = 0;
-            this.resources.suspicion = 0;
-            
-            // Reset Upgrades & Research & Vaccines
-             Object.values(this.upgrades).forEach(u => { u.count = 0; });
-             Object.values(this.research).forEach(r => { r.purchased = false; r.visible = false; });
-             // Vaccines are NOT reset (Milestones)
-
-            // Apply global multiplier
-            this.productionMultipliers.braindead *= 2.5; // Total 2.5x? Or additional? Text says "2.5x multiplier(total)"
-            this.productionMultipliers.ideas *= 2.5;
-            
-            this.log("Vaccine V2 Administered. I feel... different.", "lore");
-            this.save();
-            location.reload();
-        }
+        this.vaccineManager.triggerVaccine(tier);
     }
 
-    checkUnlocks() {
-        // Tab Unlocks
-        if (!this.tabUnlocks.upgrades && this.resources.braindead >= 10) {
-            this.tabUnlocks.upgrades = true;
-            this.updateUI(); // Force update to show tab
-        }
-        if (!this.tabUnlocks.research && this.resources.ideas > 0) {
-            this.tabUnlocks.research = true;
-            this.updateUI();
-        }
-
-        // Helper to check a collection
-        const check = (collection) => {
-            Object.values(collection).forEach(item => {
-                if (!item.visible && item.unlockCondition && item.unlockCondition(this)) {
-                    item.visible = true;
-                    item.newlyUnlocked = true;
-                    this.log(`${item.name} unlocked!`, "unlock");
-                }
-            });
-        };
-
-        check(this.upgrades);
-        check(this.research);
-        check(this.vaccines);
+    // Helper methods used by UI or Managers
+    calculateCaps() {
+        return this.resourceManager.calculateCaps();
+    }
+    
+    
+    getCost(item) {
+        return item.cost;
     }
 
     tick() {
@@ -583,35 +131,14 @@ class Game {
         const dt = (now - this.lastTick) / 1000;
         this.lastTick = now;
 
-        const immunityMult = 100 / Math.max(1, this.resources.immunity);
-        const caps = this.calculateCaps();
+        this.resourceManager.tick(dt);
+        this.jobManager.tick(dt);
         
-        // Braindead Production
-        this.resources.braindead += (this.production.braindead * this.productionMultipliers.braindead * immunityMult) * dt;
+        this.upgradeManager.checkUnlocks();
+        this.researchManager.checkUnlocks();
+        this.vaccineManager.checkUnlocks();
         
-        // Ideas Production with Soft Cap Logic
-        let ideasProduction = this.production.ideas * this.productionMultipliers.ideas * dt;
-        if (this.resources.ideas > caps.ideas.soft) {
-            this.resources.ideas += ideasProduction / Math.pow(this.scalingMulti,(this.resources.ideas-caps.ideas.soft)); // Penalty if above soft cap
-        }
-        else {
-            this.resources.ideas += ideasProduction;
-        }
-        
-        this.checkCaps();
-        
-        if (this.jobCooldown > 0) {
-            this.jobCooldown -= dt;
-        }
-
-        this.checkUnlocks();
         this.updateUI();
-        
-        // Autosave every 30s
-        if (now - this.lastSave > 30000) {
-            this.save();
-            this.lastSave = now;
-        }
         
         requestAnimationFrame(() => this.tick());
     }
