@@ -15,6 +15,7 @@ class TerminalUI {
         };
         
         this.currentView = 'main'; // main, upgrades, research, jobs
+        this.currentLogTab = 'system'; // system, transactions
         this.lastControlsHTML = '';
         this.lastNavHTML = '';
         this.lastResourceHTML = '';
@@ -48,7 +49,8 @@ class TerminalUI {
                 fb.textContent = `+0 (MAX)`;
                 fb.style.color = '#ff4444';
             } else {
-                fb.textContent = `+${Math.floor(gain)} Bd`;
+                const displayGain = gain % 1 === 0 ? gain : gain.toFixed(1);
+                fb.textContent = `+${displayGain} Bd`;
                 fb.style.color = ''; // Reset color
             }
             
@@ -122,6 +124,10 @@ class TerminalUI {
         }
     }
 
+    formatNumber(num) {
+        return num % 1 === 0 ? num : num.toFixed(1);
+    }
+
     updateResources(game) {
         if (this.elements.resourceStrip.style.display === 'none') return;
 
@@ -139,8 +145,8 @@ class TerminalUI {
 
         // Braindead (Always show if strip is visible)
         if (true) {
-            const bdTooltip = `Base: ${Math.floor(game.caps.braindead)} x Brain Size: ${game.brainSize}`;
-            html += `<div class="res-item" onmouseenter="game.ui.showTooltip('${bdTooltip}')" onmouseleave="game.ui.hideTooltip()">Braindead: <span class="res-val">${Math.floor(res.braindead)}</span>`;
+            const bdTooltip = `Base: ${this.formatNumber(game.caps.braindead)} x Brain Size: ${game.brainSize}`;
+            html += `<div class="res-item" onmouseenter="game.ui.showTooltip('${bdTooltip}')" onmouseleave="game.ui.hideTooltip()">Braindead: <span class="res-val">${this.formatNumber(res.braindead)}</span>`;
             if (res.braindead >= caps.braindead) {
                 html += `<span class="res-capped">(MAX)</span>`;
             } else if (bdRate > 0) {
@@ -161,7 +167,7 @@ class TerminalUI {
         }
         
         // Decimal place manipulation
-        if (res.immunity < 100) html += `<div class="res-item">Immunity: <span class="res-val">${Math.floor(res.immunity)}</span></div>`;
+        if (res.immunity < 100) html += `<div class="res-item">Immunity: <span class="res-val">${this.formatNumber(res.immunity)}</span></div>`;
         
         // Currency (Show if we have any, or if jobs are unlocked)
         if (res.currency > 0 || game.tabUnlocks.jobs) {
@@ -304,14 +310,45 @@ class TerminalUI {
 
     getUpgradesHTML(game) {
         let html = '';
+
+        // Check for Biomatter Lab Unlock
+        const biomatterUnlocked = game.research.studyBiomatter && game.research.studyBiomatter.purchased;
+
+        if (biomatterUnlocked) {
+            // Render Subtabs
+            const activeGeneral = game.currentUpgradeTab === 'general' ? 'active' : '';
+            const activeBio = game.currentUpgradeTab === 'biomatter' ? 'active' : '';
+            
+            html += `
+            <div class="sub-tab-container">
+                <button class="sub-tab-btn ${activeGeneral}" onclick="game.ui.switchUpgradeTab('general')">General</button>
+                <div style="color: var(--dim-text);">|</div>
+                <button class="sub-tab-btn ${activeBio}" onclick="game.ui.switchUpgradeTab('biomatter')">Biomatter Lab</button>
+            </div>
+            `;
+        }
+
         Object.values(game.upgrades).forEach(u => {
             if (!u.visible) return;
+
+            // Filter based on tab
+            const type = u.type || 'general';
+            if (biomatterUnlocked) {
+                 if (game.currentUpgradeTab !== type) return;
+            } else {
+                // If not unlocked, only show general (or everything if we want, but 'biomatter' type implies hidden-ish until unlock? 
+                // Actually, existing logic hides them via 'visible' anyway until unlockCondition met.
+                // But for organization, if biomatter IS unlocked, we strict filter.
+                // If NOT unlocked, we just show whatever is visible (which theoretically shouldn't include biomatter ones if their unlock condition requires the research).
+                // Wait, their unlock condition IS the research. So they won't be visible unless unlocked. 
+                // So this filter is safe.
+            }
 
             const cost = game.getCost(u); // Use game.getCost(u)
             const canAfford = game.resources[u.currency] >= cost;
             const disabled = canAfford ? '' : 'disabled';
             
-            let text = `buy ${u.name.toLowerCase()} (${Math.floor(cost)} ${u.currency === 'braindead' ? 'bd' : 'id'})`; // Use cost here
+            let text = `buy ${u.name.toLowerCase()} (${Math.floor(cost)} ${u.currency === 'braindead' ? 'bd' : (u.currency === 'ideas' ? 'id' : 'curr')})`; 
             if (u.count > 0) text += ` [owned: ${u.count}]`;
             
             // Escape description for attribute
@@ -416,21 +453,19 @@ class TerminalUI {
         
         if (type === 'upgrade' || type === 'unlock') {
             targetDisplay = this.elements.purchaseLogDisplay;
-            // Reveal purchase log if hidden
-            const overlay = document.getElementById('purchase-log-column');
-            if (overlay && !overlay.classList.contains('visible')) {
-                overlay.classList.add('visible');
-                setTimeout(() => {
-                    overlay.classList.add('visible-border');
-                }, 100);
-
-                // Also reveal System Log (Right Column)
-                const sysLog = document.getElementById('log-column');
-                if (sysLog) {
-                    sysLog.style.opacity = '1'; // Force reveal
-                    sysLog.classList.add('visible-content');
-                    sysLog.classList.add('visible-border');
-                }
+            
+            // Notify if not on transactions tab
+            if (this.currentLogTab !== 'transactions') {
+                const tab = document.getElementById('tab-transactions');
+                if (tab) tab.classList.add('has-new');
+            }
+            
+            // Ensure Log Column is visible (if it wasn't already)
+            const sysLog = document.getElementById('log-column');
+            if (sysLog && getComputedStyle(sysLog).opacity === '0') {
+                 sysLog.style.opacity = '1';
+                 sysLog.classList.add('visible-content');
+                 sysLog.classList.add('visible-border');
             }
         }
 
@@ -505,5 +540,36 @@ class TerminalUI {
         
         this.elements.tooltip.style.left = `${left}px`;
         this.elements.tooltip.style.top = `${top}px`;
+    }
+
+    switchLogTab(tab) {
+        this.currentLogTab = tab;
+        
+        // Toggle Display
+        const sysDisplay = this.elements.logDisplay;
+        const transDisplay = this.elements.purchaseLogDisplay;
+        const sysTab = document.getElementById('tab-system');
+        const transTab = document.getElementById('tab-transactions');
+
+        if (tab === 'system') {
+            sysDisplay.style.display = 'flex';
+            transDisplay.style.display = 'none';
+            sysTab.classList.add('active');
+            transTab.classList.remove('active');
+        } else {
+            sysDisplay.style.display = 'none';
+            transDisplay.style.display = 'flex';
+            sysTab.classList.remove('active');
+            transTab.classList.add('active');
+            // Remove notification
+            transTab.classList.remove('has-new');
+            
+            // Auto scroll to bottom when switching
+             transDisplay.scrollTop = transDisplay.scrollHeight;
+        }
+    }
+    switchUpgradeTab(tab) {
+        this.game.currentUpgradeTab = tab;
+        this.update(this.game);
     }
 }

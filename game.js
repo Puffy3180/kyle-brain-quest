@@ -36,6 +36,7 @@ class Game {
 
         this.logs = [];
         this.currentLogFilter = 'all';
+        this.currentUpgradeTab = 'general';
         this.options = {
             brightness: 100
         };

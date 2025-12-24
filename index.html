@@ -31,8 +31,13 @@
 
             <!-- Right: Log -->
             <div id="log-column" class="log-column">
-                <div class="log-header">SYSTEM LOG</div>
+                <div class="log-tabs">
+                    <button id="tab-system" class="log-tab-btn active" onclick="game.ui.switchLogTab('system')">SYSTEM</button>
+                    <div class="tab-separator">|</div>
+                    <button id="tab-transactions" class="log-tab-btn" onclick="game.ui.switchLogTab('transactions')">TRANSACTIONS</button>
+                </div>
                 <div id="log-display" class="log-display"></div>
+                <div id="purchase-log-display" class="log-display" style="display: none;"></div>
             </div>
 
 
@@ -42,12 +47,6 @@
         <div id="nav-strip" class="nav-strip" style="display: none;">
             <!-- Injected by JS -->
         </div>
-    </div>
-
-    <!-- Purchase Log Overlay -->
-    <div id="purchase-log-column" class="purchase-log-overlay">
-        <div class="log-header">TRANSACTIONS</div>
-        <div id="purchase-log-display" class="log-display"></div>
     </div>
 
 

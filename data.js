@@ -11,6 +11,7 @@ function getInitialUpgrades() {
             currency: "braindead",
             count: 0,
             clickBonus: { braindead: 0.5 },
+            type: 'general',
             unlockCondition: function(game) { return game.resources.braindead >= 10; },
             visible: false
         },
@@ -97,7 +98,9 @@ function getInitialUpgrades() {
             costScale: 1.2,
             currency: "currency",
             count: 0,
+            count: 0,
             productionBonus: { braindead: 5 },
+            type: 'biomatter',
             unlockCondition: function(game) { return game.research.biomatterLab && game.research.biomatterLab.purchased; },
             visible: false
         },
@@ -109,8 +112,23 @@ function getInitialUpgrades() {
             costScale: 1.3,
             currency: "currency",
             count: 0,
+            count: 0,
             productionBonus: { ideas: 0.5 },
+            type: 'biomatter',
             unlockCondition: function(game) { return game.research.biomatterLab && game.research.biomatterLab.purchased; },
+            visible: false
+        },
+        neuralStatic: {
+            id: 'neuralStatic',
+            name: "Neural Static",
+            description: "Brain noise generates activity. Costs Ideas.",
+            baseCost: 10,
+            costScale: 1.5,
+            currency: "ideas",
+            count: 0,
+            productionBonus: { braindead: 5 },
+            type: 'general',
+            unlockCondition: function(game) { return game.research.neuroticCondensor && game.research.neuroticCondensor.purchased; },
             visible: false
         }
     };
