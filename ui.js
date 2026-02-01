@@ -344,7 +344,7 @@ class TerminalUI {
                 // So this filter is safe.
             }
 
-            const cost = game.getCost(u); // Use game.getCost(u)
+            const cost = game.upgradeManager.getCost(u);
             const canAfford = game.resources[u.currency] >= cost;
             const disabled = canAfford ? '' : 'disabled';
             
